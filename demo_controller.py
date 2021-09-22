@@ -4,7 +4,7 @@
 # note that the param 'controller' received by 'control' is provided through environment.play(pcont=x)
 # 'controller' could contain either weights to be used in the standard controller (or other controller implemented),
 # or even a full network structure (ex.: from NEAT).
-from controller import Controller
+from evoman.controller import Controller
 import numpy as np
 
 
@@ -18,7 +18,7 @@ class player_controller(Controller):
 		# Number of hidden neurons
 		self.n_hidden = [_n_hidden]
 
-	def control(self, inputs, controller):
+	def control(self, inputs, controller=None):
 		# Normalises the input using min-max scaling
 		inputs = (inputs-min(inputs))/float((max(inputs)-min(inputs)))
 

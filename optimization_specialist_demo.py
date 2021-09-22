@@ -6,9 +6,9 @@
 ###############################################################################
 
 # imports framework
-import sys
-sys.path.insert(0, 'evoman')
-from environment import Environment
+# import sys
+# sys.path.insert(0, 'evoman')
+from evoman.environment import Environment
 from demo_controller import player_controller
 
 # imports other libs
@@ -169,7 +169,7 @@ if run_mode =='test':
     env.update_parameter('speed','normal')
     evaluate([bsol])
 
-    sys.exit(0)
+    quit()
 
 
 # initializes population loading old solutions or generating new ones

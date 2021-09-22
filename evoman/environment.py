@@ -8,6 +8,7 @@ import sys
 import gzip
 import pickle
 import numpy
+import numpy as np
 import pygame
 from pygame.locals import *
 import struct
@@ -73,7 +74,7 @@ class Environment(object):
         self.solutions = solutions
         self.joy = 0
         self.use_joystick = use_joystick
-
+        self.player_life_timeseries = []
 
         # initializes default random controllers
 
@@ -449,6 +450,7 @@ class Environment(object):
 
             # game timer
             self.time += 1
+            self.player_life_timeseries.append(self.get_playerlife())
             if self.playermode == "human" or self.sound == "on":
                 # sound effects
                 if self.sound == "on" and self.time == 1:
@@ -498,7 +500,7 @@ class Environment(object):
             # returns results of the run
             def return_run():
                 self.print_logs("RUN: run status: enemy: "+str(self.enemyn)+"; fitness: " + str(fitness) + "; player life: " + str(self.player.life)  + "; enemy life: " + str(self.enemy.life) + "; time: " + str(self.time))
-
+                self.player_life_timeseries = []
                 return  fitness, self.player.life, self.enemy.life, self.time
 
 
