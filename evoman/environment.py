@@ -386,7 +386,8 @@ class Environment(object):
 
 
             # default fitness function for single solutions
-    def fitness_single(self):
+
+    def fitness_single(self) -> float:
         return 0.9*(100 - self.get_enemylife()) + 0.1*self.get_playerlife() - numpy.log(self.get_time())
 
     # default fitness function for consolidating solutions among multiple games
@@ -406,11 +407,13 @@ class Environment(object):
         return self.time
 
     # returns results of the run
-    def return_run(self, fitness):
+    def return_run(self):
+        # gets fitness for training agents
+        fitness = self.fitness_single()
         self.print_logs(
             "RUN: run status: enemy: " + str(self.enemyn) + "; fitness: " + str(fitness) + "; player life: " + str(
                 self.player.life) + "; enemy life: " + str(self.enemy.life) + "; time: " + str(self.time))
-        return fitness, self.player.life, self.enemy.life, self.time, self.player_life_timeseries
+        return fitness, self.player.life, self.enemy.life, self.time
 
     # runs game for a single enemy
     def run_single(self,enemyn,pcont,econt):
@@ -499,8 +502,6 @@ class Environment(object):
             pygame.draw.line(self.screen, (0,   0,   0), [590, 49],[695, 49], 2)
 
 
-            #gets fitness for training agents
-            fitness = self.fitness_single()
 
             if self.start == False and self.playermode == "human":
 
@@ -527,9 +528,9 @@ class Environment(object):
                 if self.playermode == "human":
                     # delays run finalization for human mode
                     if ends == -self.overturetime:
-                        return self.return_run(fitness)
+                        return self.return_run()
                 else:
-                    return self.return_run(fitness)
+                    return self.return_run()
 
 
             # checks enemy life status
@@ -550,9 +551,9 @@ class Environment(object):
 
                 if self.playermode == "human":
                     if ends == -self.overturetime:
-                        return self.return_run(fitness)
+                        return self.return_run()
                 else:
-                    return self.return_run(fitness)
+                    return self.return_run()
 
 
             if self.loadplayer == "no":# removes player sprite from game
@@ -568,11 +569,11 @@ class Environment(object):
             # game runtime limit
             if self.playermode == 'ai':
                 if self.time >= enemy.timeexpire:
-                    return self.return_run(fitness)
+                    return self.return_run()
 
             else:
                 if self.time >= self.timeexpire:
-                    return self.return_run(fitness)
+                    return self.return_run()
 
 
 
@@ -593,7 +594,7 @@ class Environment(object):
         venemylife = self.cons_multi(numpy.array(venemylife))
         vtime = self.cons_multi(numpy.array(vtime))
 
-        return    vfitness, vplayerlife, venemylife, vtime
+        return vfitness, vplayerlife, venemylife, vtime
 
 
     # checks objective mode
