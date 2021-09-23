@@ -1,5 +1,6 @@
 # implements controller structure for player
 from evoman.controller import Controller
+import numpy as np
 
 
 class player_controller(Controller):
@@ -7,7 +8,7 @@ class player_controller(Controller):
 		# Number of hidden neurons
 		self.n_hidden = [_n_hidden]
 
-	def control(self, inputs, controller=None):
+	def control(self, inputs: np.ndarray, controller=None):
 		"""
 		Here what action is going to do is decided. This is called by the function update in the class Player
 		which is called automatically when updating the tilemaps at each tick of the game by the function run_single
@@ -23,7 +24,7 @@ class player_controller(Controller):
 		 	- vertical distance between player and bullet
 		 	(NOTE: As a default, if there were fired less than 8 bullets, the remaining bullets will be added
 		 	here with horizontal and vertical distance of 0)
-		:param controller: What is going to be used here as controller. It can be whatever, and outside of environment
+		:param controller: What is going to be used here as controller. It can be whatever, and outside of the environment
 		this will be used for updating its inner values (e.g. with evolutionary algorithms), and here it is used for
 		extracting the next move. E.g. it can be a dictionary containing the weights and biases of a neural network,
 		or a pytorch object, and so on.

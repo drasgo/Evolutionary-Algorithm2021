@@ -67,7 +67,7 @@ last_best = 0
 
 # runs simulation
 def simulation(env,x):
-    f,p,e,t = env.play(pcont=x)
+    f,p,e,t, l = env.play(pcont=x)
     return f
 
 # normalizes
