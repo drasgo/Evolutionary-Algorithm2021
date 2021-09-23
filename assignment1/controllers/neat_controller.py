@@ -5,13 +5,24 @@ import neat
 
 
 class Neat_Controller(Controller):
-	def __init__(self, neat_configs):
+	def __init__(self, neat_configs: str):
+		# Load config file
+		config = self.load_config(neat_configs)
 		# Create the population, which is the top-level object for a NEAT run.
-		self.population = self.prepare_population(configs=neat_configs)
+		self.population = self.prepare_population(configs=config)
 		self.current_winner_net = self.population.best_genome
 		self.inputs = []
 		self.outputs = []
 		self.fitnesses = []
+
+	def load_config(self, config_path: str):
+		try:
+			return neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+								 neat.DefaultSpeciesSet, neat.DefaultStagnation,
+								 config_path)
+		except Exception as exc:
+			print(f"Failed loading neat config file {config_path}, with exception {exc}")
+			quit()
 
 	def prepare_population(self, configs) -> neat.Population:
 		population = neat.Population(configs)
