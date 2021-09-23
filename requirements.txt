@@ -1,3 +1,4 @@
 pygame
 tmx
 numpy
+neat-python

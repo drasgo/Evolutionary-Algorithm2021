@@ -8,10 +8,10 @@ import sys
 import numpy
 import random
 
-import Base
-from Base.SpriteConstants import *
-from Base.SpriteDefinition import *
-from sensors import Sensors
+import evoman.Base
+from evoman.Base.SpriteConstants import *
+from evoman.Base.SpriteDefinition import *
+from evoman.sensors import Sensors
 
 tilemap = 'evoman/map1.tmx'  # scenario
 timeexpire = 1000 # game run limit
