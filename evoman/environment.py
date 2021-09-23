@@ -50,6 +50,7 @@ class Environment(object):
 
 
         # initializes parameters
+        self.local_dir = os.path.dirname(__file__)
 
         self.experiment_name = experiment_name
         self.multiplemode = multiplemode
@@ -91,7 +92,7 @@ class Environment(object):
 
         # initializes log file
         if self.logs  == "on" and self.savelogs == "yes":
-            file_aux  = open(self.experiment_name+'/evoman_logs.txt','w')
+            file_aux  = open(self.experiment_name +'_logs.txt', "w")
             file_aux.close()
 
 
@@ -173,7 +174,7 @@ class Environment(object):
             print('\n'+msg) # prints log messages to screen
 
             if self.savelogs == "yes": # prints log messages to file
-                file_aux  = open(self.experiment_name+'/evoman_logs.txt','a')
+                file_aux  = open(self.experiment_name + '_logs.txt','a')
                 file_aux.write('\n\n'+msg)
                 file_aux.close()
 

@@ -3,7 +3,7 @@
 # Author: Karine Miras         #
 # karine.smiras@gmail.com      #
 ################################
-
+import os
 import sys
 import numpy
 import random
@@ -13,19 +13,20 @@ from evoman.Base.SpriteConstants import *
 from evoman.Base.SpriteDefinition import *
 from evoman.sensors import Sensors
 
-tilemap = 'evoman/map1.tmx'  # scenario
+local_dir = os.path.dirname(__file__)
+
+tilemap = local_dir + '/map1.tmx'  # scenario
 timeexpire = 1000 # game run limit
 
 
 # enemy 1 sprite, flashman
 class Enemy(pygame.sprite.Sprite):
 
-
     def __init__(self, location, *groups):
 
         super(Enemy, self).__init__(*groups)
 
-        self.spriteDefinition = SpriteDefinition('evoman/images/EnemySprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition(local_dir + '/images/EnemySprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.LEFT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -281,8 +282,9 @@ class Enemy(pygame.sprite.Sprite):
 class Bullet_e1(pygame.sprite.Sprite):
 
 
+    local_dir = os.path.dirname(__file__)
 
-    image = pygame.image.load('evoman/images/bullet2_l.png')
+    image = pygame.image.load(local_dir + '/images/bullet2_l.png')
 
     def __init__(self, location, direction, n_twist, *groups):
         super(Bullet_e1, self).__init__(*groups)
@@ -292,9 +294,9 @@ class Bullet_e1(pygame.sprite.Sprite):
 
         # Fits image according to the side the enemy is turned to.
         if self.direction == 1:
-            self.image = pygame.image.load('evoman/images/bullet2_r.png')
+            self.image = pygame.image.load(self.local_dir + '/images/bullet2_r.png')
         else:
-            self.image = pygame.image.load('evoman/images/bullet2_l.png')
+            self.image = pygame.image.load(self.local_dir + '/images/bullet2_l.png')
 
 
 
