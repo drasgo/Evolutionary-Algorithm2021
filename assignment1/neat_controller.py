@@ -1,12 +1,26 @@
 # implements controller structure for player
 from evoman.controller import Controller
 import numpy as np
+import neat
 
 
-class player_controller(Controller):
-	def __init__(self, _n_hidden):
-		# Number of hidden neurons
-		self.n_hidden = [_n_hidden]
+class Neat_Controller(Controller):
+	def __init__(self, neat_configs):
+		# Create the population, which is the top-level object for a NEAT run.
+		self.population = self.prepare_population(configs=neat_configs)
+		self.current_winner_net = self.population.best_genome
+		self.inputs = []
+		self.outputs = []
+		self.fitnesses = []
+
+	def prepare_population(self, configs) -> neat.Population:
+		population = neat.Population(configs)
+		# Add a stdout reporter to show progress in the terminal.
+		population.add_reporter(neat.StdOutReporter(True))
+		stats = neat.StatisticsReporter()
+		population.add_reporter(stats)
+		population.add_reporter(neat.Checkpointer(5))
+		return population
 
 	def control(self, inputs: np.ndarray, controller=None):
 		"""
@@ -28,6 +42,24 @@ class player_controller(Controller):
 		this will be used for updating its inner values (e.g. with evolutionary algorithms), and here it is used for
 		extracting the next move. E.g. it can be a dictionary containing the weights and biases of a neural network,
 		or a pytorch object, and so on.
-		:return: a list of 5 values as one-hot vector (all 0s except one 1): [left, right, jump, shoot, release]
+		:return: a list of 5 values as one-hot vector (all 0s except one 1):
+			- left,
+			- right,
+			- jump,
+			- shoot,
+			- release.
 		"""
-		pass
+		output = self.current_winner_net.activate(inputs)
+		return [1 if com > 0.5 else 0 for com in output]
+
+	def eval_genomes(self, genomes):
+		for genome_id, genome in genomes:
+			genome.fitness = 4.0
+			# net = neat.nn.FeedForwardNetwork.create(genome, config)
+			for fit in self.fitnesses:
+				genome.fitness -= fit
+			# for inps, outs in zip(self.inputs, self.outputs):
+
+	def evolve(self, fitness_value: float):
+		self.fitnesses.append(fitness_value)
+		self.current_winner_net = self.population.run(self.eval_genomes, 300)
