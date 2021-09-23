@@ -1,4 +1,4 @@
-from assignment1.ga_controller import player_controller
+from ga_controller import player_controller
 from evoman.environment import Environment
 
 n_hidden_neurons = 20
