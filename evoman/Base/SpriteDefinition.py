@@ -1,5 +1,8 @@
+import os
+
 import pygame
 from . import SpriteConstants
+# local_dir = os.path.dirname(__file__)
 
 class SpriteDefinition(object):
     """Contains the properties and methods to control a SpriteSheet structure"""

@@ -8,23 +8,24 @@ import sys
 import numpy
 import random
 
+import os
+
 import evoman.Base
 from evoman.Base.SpriteConstants import *
 from evoman.Base.SpriteDefinition import *
 from evoman.sensors import Sensors
 
-tilemap = 'evoman/map2.tmx'
+local_dir = os.path.dirname(__file__)
+
+tilemap = local_dir + '/map2.tmx'
 timeexpire = 2200 # game run limit
 
 # enemy 6 sprite, crashman
 class Enemy(pygame.sprite.Sprite):
 
-
-
-
     def __init__(self, location, *groups):
         super(Enemy, self).__init__(*groups)
-        self.spriteDefinition = SpriteDefinition('evoman/images/EnemySprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition(local_dir + '/images/EnemySprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.LEFT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())

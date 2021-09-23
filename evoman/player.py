@@ -3,7 +3,7 @@
 # Author: Karine Miras         #
 # karine.smiras@gmail.com      #
 ################################
-
+import os
 import sys
 import numpy
 import struct
@@ -13,13 +13,12 @@ import evoman.Base
 from evoman.Base.SpriteConstants import *
 from evoman.Base.SpriteDefinition import *
 from evoman.sensors import *
+local_dir = os.path.dirname(__file__)
 
 
 # player proctile
 class Bullet_p(pygame.sprite.Sprite):
-
-
-    image = pygame.image.load('evoman/images/bullet_r.png')
+    image = pygame.image.load(local_dir + '/images/bullet_r.png')
 
     def __init__(self, location, direction, n_twist, *groups):
         super(Bullet_p, self).__init__(*groups)
@@ -30,9 +29,9 @@ class Bullet_p(pygame.sprite.Sprite):
 
         # fits image according to the side the player is turned to
         if self.direction == 1:
-            self.image = pygame.image.load('evoman/images/bullet_r.png')
+            self.image = pygame.image.load(local_dir + '/images/bullet_r.png')
         else:
-            self.image = pygame.image.load('evoman/images/bullet_l.png')
+            self.image = pygame.image.load(local_dir + '/images/bullet_l.png')
 
 
 
@@ -77,7 +76,7 @@ class Player(pygame.sprite.Sprite):
         super(Player, self).__init__(*groups)
 
 
-        self.spriteDefinition = SpriteDefinition('evoman/images/EvoManSprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition(local_dir + '/images/EvoManSprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.RIGHT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -180,6 +179,7 @@ class Player(pygame.sprite.Sprite):
 
                 # calls the controller providing game sensors
                 actions = game.player_controller.control(self.sensors.get(game), game.pcont)
+                # actions = game.player_controller.control(self.sensors.get(game), game.pcont, game.fitness_single())
                 if len(actions) < 5:
                     game.print_logs("ERROR: Player controller must return 5 decision variables.")
                     sys.exit(0)

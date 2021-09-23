@@ -5,7 +5,7 @@
 # Changes (July 2013 by Renfred Harper):
 # Ported to Python 3
 # Added selective area support SpriteLayer.draw
-
+import os
 import sys
 import struct
 import pygame
@@ -54,6 +54,8 @@ class Tile(object):
 
 
 class Tileset(object):
+    local_dir = os.path.dirname(__file__)
+
     def __init__(self, name, tile_width, tile_height, firstgid):
         self.name = name
         self.tile_width = tile_width
@@ -66,7 +68,7 @@ class Tileset(object):
     def fromxml(cls, tag, firstgid=None):
         if 'source' in tag.attrib:
             firstgid = int(tag.attrib['firstgid'])
-            with open(tag.attrib['source']) as f:
+            with open(cls.local_dir + "/" + tag.attrib['source']) as f:
                 tileset = ElementTree.fromstring(f.read())
             return cls.fromxml(tileset, firstgid)
 
@@ -88,7 +90,7 @@ class Tileset(object):
         return tileset
 
     def add_image(self, file):
-        image = pygame.image.load(file).convert_alpha()
+        image = pygame.image.load(self.local_dir + "/" + file).convert_alpha()
         if not image:
             sys.exit("Error creating new Tileset: file %s not found" % file)
         id = self.firstgid
