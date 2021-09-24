@@ -4,7 +4,7 @@ from typing import List
 
 from assignment1.controllers.neat_controller import Neat_Controller
 from assignment1.environment import New_Environment
-from assignment1.plotting import plot
+from assignment1.plotting import line_plot, box_plot
 
 
 def cycle(controller: Neat_Controller, environment: New_Environment) -> List[float]:
@@ -30,6 +30,10 @@ def cycle(controller: Neat_Controller, environment: New_Environment) -> List[flo
     return fitness_nets
 
 
+def neat_test(network):
+    pass
+
+
 def run():
     # True for not using visuals and thus making experiments faster
     headless = True
@@ -44,24 +48,28 @@ def run():
     local_dir = os.path.dirname(__file__)
     config = os.path.join(local_dir, "configs", "config-neat")
     for enemy in enemies_numbers:
-        controller = Neat_Controller(config)
-        environment = New_Environment(experiment_name=name + str(enemy),
-                          enemies=[enemy],
-                          playermode="ai",
-                          player_controller=controller,
-                          enemymode="static",
-                          level=2,
-                          speed="fastest")
+        for run_idx in range(10):
+            controller = Neat_Controller(config)
+            environment = New_Environment(experiment_name=name + str(enemy),
+                              enemies=[enemy],
+                              playermode="ai",
+                              player_controller=controller,
+                              enemymode="static",
+                              level=2,
+                              speed="fastest")
 
-        total_fitness = []
-        for gen in range(gens):
-            print(f"Gen n°.{gen} of {gens}")
-            fitness = cycle(controller, environment)
-            print(f"Finished gen n°.{gen} with average fitness {sum(fitness)/len(fitness)}")
-            total_fitness.append(fitness)
+            total_fitness = []
 
-        print(f"Against enemy {enemy} the mean fitness was {sum(total_fitness)/(len(total_fitness))}")
-        plot(f"{name}_enemy#{enemy}", total_fitness)
+            for gen in range(gens):
+                print(f"Gen n°.{gen} of {gens}")
+                fitness = cycle(controller, environment)
+                print(f"Finished gen n°.{gen} with average fitness {sum(fitness)/len(fitness)}")
+                mean_fitness = sum(fitness)/len(fitness)
+                max_fitness = max(fitness)
+                total_fitness.append(fitness)
+
+            print(f"Against enemy {enemy} the mean fitness was {sum(total_fitness)/(len(total_fitness))}")
+        line_plot(f"{name}_enemy#{enemy}", total_fitness)
         input()
 
 
