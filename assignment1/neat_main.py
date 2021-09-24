@@ -1,13 +1,13 @@
 import os
 
-from typing import List, Tuple
+from typing import List
 
 from assignment1.controllers.neat_controller import Neat_Controller
-from assignment1.environment import Environment
+from assignment1.environment import New_Environment
 from assignment1.plotting import plot
 
 
-def cycle(controller: Neat_Controller, environment: Environment) -> List[float]:
+def cycle(controller: Neat_Controller, environment: New_Environment) -> List[float]:
     print("starting cycle")
     print("preparing new networks")
 
@@ -45,7 +45,7 @@ def run():
     config = os.path.join(local_dir, "configs", "config-neat")
     for enemy in enemies_numbers:
         controller = Neat_Controller(config)
-        environment = Environment(experiment_name=name + str(enemy),
+        environment = New_Environment(experiment_name=name + str(enemy),
                           enemies=[enemy],
                           playermode="ai",
                           player_controller=controller,
@@ -54,15 +54,14 @@ def run():
                           speed="fastest")
 
         total_fitness = []
-        fitness = 0
         for gen in range(gens):
             print(f"Gen n°.{gen} of {gens}")
             fitness = cycle(controller, environment)
+            print(f"Finished gen n°.{gen} with average fitness {sum(fitness)/len(fitness)}")
             total_fitness.append(fitness)
-            print(f"Finished gen n°.{gen} with fitness {fitness}")
 
         print(f"Against enemy {enemy} the mean fitness was {sum(total_fitness)/(len(total_fitness))}")
-        plot(total_fitness)
+        plot(f"{name}_enemy#{enemy}", total_fitness)
         input()
 
 
