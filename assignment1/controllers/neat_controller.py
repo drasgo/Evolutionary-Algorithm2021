@@ -1,6 +1,8 @@
 # implements controller structure for player
 from typing import List
 
+from neat.six_util import itervalues
+
 from evoman.controller import Controller
 import numpy as np
 import neat
@@ -22,14 +24,15 @@ class Neat_Controller(Controller):
 		self.fitness_values = []
 
 	def prepare_new_networks(self):
-		for _, genome in list(self.population.population.items()):
-			self.nets.append((genome, neat.nn.FeedForwardNetwork.create(genome, self.configs)))
+		self.nets = []
+		for gen_idx, (_, genome) in enumerate(list(self.population.population.items())):
+			self.nets.append([gen_idx, genome, neat.nn.FeedForwardNetwork.create(genome, self.configs)])
 
 	def load_config(self, config_path: str):
 		try:
 			return neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-								 neat.DefaultSpeciesSet, neat.DefaultStagnation,
-								 config_path)
+							   neat.DefaultSpeciesSet, neat.DefaultStagnation,
+							   config_path)
 		except Exception as exc:
 			print(f"Failed loading neat config file {config_path}, with exception {exc}")
 			quit()
@@ -79,9 +82,9 @@ class Neat_Controller(Controller):
 
 		# OPPURE SI SALVA L'AZIONE, E POI DOPO SI TESTA L'AZIONE CON L'OUTPUT, E SI CALCOLA UN ALTRO FITNESS (PER OGNI AZIONE)
 
-		network = controller[1]
+		network = controller[2]
 		output = network.activate(inputs)
-		action = np.argmax(output)
+		action = [1 if act > 0.5 else 0 for act in output]
 
 		# self.inputs.append(inputs)
 		# self.actions.append(action)
@@ -89,22 +92,27 @@ class Neat_Controller(Controller):
 		return action
 
 	def eval_genomes(self, genomes, config):
-		for (_, genome), value in zip(genomes, self.fitness_values):
-			genome.fitness = value
-			# net = neat.nn.FeedForwardNetwork.create(genome, config)
-			# for fit in self.fitnesses:
-			# 	genome.fitness -= fit
-			# 	OTHER POSSIBLE FITNESS FUNCTION IS: SUM OF(value of index of output - fitness)^2
+		for idx, net in enumerate(self.nets):
+			print(f"Evolving network n°. {idx}")
+			gen_idx = net[0]
+			fit = net[-1]
+			genomes[gen_idx][1].fitness = fit
+	# net = neat.nn.FeedForwardNetwork.create(genome, config)
+		# for fit in self.fitnesses:
+		# 	genome.fitness -= fit
+		# 	OTHER POSSIBLE FITNESS FUNCTION IS: SUM OF(value of index of output - fitness)^2
+
 
 	def evolve(self, fitness_value: List[float]):
+		print("Starting evolving")
 		self.fitness_values = fitness_value
 		# self.fitnesses.append(fitness_value)
-		_ = self.population.run(self.eval_genomes, 300)
+		_ = self.population.run(self.eval_genomes, 1)
 		self.fitness_values = []
-		# best_genomes = self.stats.best_unique_genomes(3)
-		# best_networks = []
-		# for g in best_genomes:
-		# 	best_networks.append(neat.nn.FeedForwardNetwork.create(g, self.configs))
+	# best_genomes = self.stats.best_unique_genomes(3)
+	# best_networks = []
+	# for g in best_genomes:
+	# 	best_networks.append(neat.nn.FeedForwardNetwork.create(g, self.configs))
 
 	def reset(self):
 		self.inputs = []
