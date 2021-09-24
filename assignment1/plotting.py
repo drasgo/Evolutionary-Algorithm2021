@@ -63,7 +63,15 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     # plt.fill_between(generations, average_fitnesses - std_fit, average_fitnesses + std_fit, color="lightsteelblue")
 
 
-def box_plot(experiment_name, best_fitnesses, images_folder: str="images"):
+def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
+    """
+    Each element is the mean value of 5 testing with best network from run N
+    [ mean_value_run 1, mean_value_run 2, ..]
+    :param experiment_name:
+    :param best_fitnesses:
+    :param images_folder:
+    :return:
+    """
     data = np.array(best_fitnesses)
     plt.figure(1)
     plt.boxplot(data)
