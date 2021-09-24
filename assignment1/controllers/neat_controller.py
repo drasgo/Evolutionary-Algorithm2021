@@ -1,8 +1,4 @@
 # implements controller structure for player
-from typing import List
-
-from neat.six_util import itervalues
-
 from evoman.controller import Controller
 import numpy as np
 import neat
@@ -16,12 +12,7 @@ class Neat_Controller(Controller):
 		self.stats = neat.StatisticsReporter()
 		self.population = self.prepare_population()
 		self.current_winner_net = self.population.best_genome
-		# self.inputs = []
-		# self.outputs = []
-		# self.fitnesses = []
-		# self.actions = []
 		self.nets = []
-		self.fitness_values = []
 
 	def prepare_new_networks(self):
 		self.nets = []
@@ -74,21 +65,11 @@ class Neat_Controller(Controller):
 			- shoot,
 			- release.
 		"""
-		# output = self.current_winner_net.activate(inputs)
-		# action = [1 if com > 0.5 else 0 for com in output]
-		# for _, nets in list(self.population.population.items()):
-		# 	output = self.current_winner_net.activate(inputs)
-		# 	action = np.argmax(output)
-
-		# OPPURE SI SALVA L'AZIONE, E POI DOPO SI TESTA L'AZIONE CON L'OUTPUT, E SI CALCOLA UN ALTRO FITNESS (PER OGNI AZIONE)
-
 		network = controller[2]
 		output = network.activate(inputs)
 		action = [1 if act > 0.5 else 0 for act in output]
 
-		# self.inputs.append(inputs)
-		# self.actions.append(action)
-		# self.fitnesses.append(fitness)
+		# OPPURE SI SALVA L'AZIONE, E POI DOPO SI TESTA L'AZIONE CON L'OUTPUT, E SI CALCOLA UN ALTRO FITNESS (PER OGNI AZIONE)
 		return action
 
 	def eval_genomes(self, genomes, config):
@@ -97,22 +78,12 @@ class Neat_Controller(Controller):
 			gen_idx = net[0]
 			fit = net[-1]
 			genomes[gen_idx][1].fitness = fit
-	# net = neat.nn.FeedForwardNetwork.create(genome, config)
-		# for fit in self.fitnesses:
-		# 	genome.fitness -= fit
 		# 	OTHER POSSIBLE FITNESS FUNCTION IS: SUM OF(value of index of output - fitness)^2
 
 
-	def evolve(self, fitness_value: List[float]):
+	def evolve(self):
 		print("Starting evolving")
-		self.fitness_values = fitness_value
-		# self.fitnesses.append(fitness_value)
 		_ = self.population.run(self.eval_genomes, 1)
-		self.fitness_values = []
-	# best_genomes = self.stats.best_unique_genomes(3)
-	# best_networks = []
-	# for g in best_genomes:
-	# 	best_networks.append(neat.nn.FeedForwardNetwork.create(g, self.configs))
 
 	def reset(self):
 		self.inputs = []

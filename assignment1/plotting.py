@@ -1,10 +1,11 @@
 import os
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def line_plot(experiment_name: str, total_fitnesses: list, images_folder: str="img"):
+def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], images_folder: str="img"):
     """
     [           Gen1        Gen2            Gen3
        Run1: [[mean, max], [mean, max], [mean, max], ...],
@@ -60,6 +61,7 @@ def line_plot(experiment_name: str, total_fitnesses: list, images_folder: str="i
     # plt.plot(generations, maximum_fitnesses, "k", color="red", label="")
     # plt.plot(generations, average_fitnesses, "k", color="darkblue")
     # plt.fill_between(generations, average_fitnesses - std_fit, average_fitnesses + std_fit, color="lightsteelblue")
+
 
 def box_plot(experiment_name, best_fitnesses, images_folder: str="images"):
     data = np.array(best_fitnesses)
