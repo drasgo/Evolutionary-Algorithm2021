@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], images_folder: str="img"):
+def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], images_folder: str="images"):
     """
     [           Gen1        Gen2            Gen3
        Run1: [[mean, max], [mean, max], [mean, max], ...],
@@ -72,9 +72,13 @@ def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
     :param images_folder:
     :return:
     """
+    if not os.path.exists(images_folder + "/"):
+        os.mkdir(images_folder)
     data = np.array(best_fitnesses)
     plt.figure(1)
     plt.boxplot(data)
+    plt.ylabel("Individual Gain")
+    plt.xlabel(experiment_name)
     plt.savefig(f"{images_folder}/{experiment_name}_box_plot.png", format="png")
 
 
@@ -82,6 +86,8 @@ if __name__ == '__main__':
     # tot_test = [[1.,0.5,1.5], [2.,1.,3.], [3.,2.,4.]]
     tot_test = [[[1., 0.5], [2.,5.], [3.,6.]],
                 [[2., 1.5], [3.,4.], [2.5,5.5]]]
+    best_test = [0.4,2,2.5, 3.3]
     line_plot("", tot_test)
+    box_plot("", best_test)
 
 

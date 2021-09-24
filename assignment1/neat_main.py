@@ -13,8 +13,8 @@ headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-enemies_numbers = [1]
-gens = 150
+enemies_numbers = [1, 2, 3, 4, 5, 6, 7, 8]
+gens = 50
 name = "neat_specialist"
 test = 5
 
@@ -90,7 +90,6 @@ def run():
 
         line_plot(f"{name}_enemy#{enemy}", mean_max_fitness_values)
         box_plot(f"{name}_enemy#{enemy}", mean_best_networks)
-        input()
 
 
 if __name__ == '__main__':
