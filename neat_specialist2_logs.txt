@@ -1,0 +1,43 @@
+
+
+MESSAGE: Pygame initialized for simulation.
+
+RUN: run status: enemy: 2; fitness: -10000.043457994192; player life: 0; enemy life: 100; time: 334
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -9970.24; player life: 0; enemy life: 70.0; time: 155
+
+RUN: run status: enemy: 2; fitness: -9970.24; player life: 0; enemy life: 70.0; time: 155
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -10000.168965517241; player life: 0; enemy life: 100; time: 290
+
+RUN: run status: enemy: 2; fitness: -9970.24; player life: 0; enemy life: 70.0; time: 155
+
+RUN: run status: enemy: 2; fitness: -10000.041259781414; player life: 0; enemy life: 100; time: 329
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156
+
+RUN: run status: enemy: 2; fitness: -9950.24087771203; player life: 0; enemy life: 50.0; time: 156

@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+local_dir = os.path.dirname(__file__)
+
+
 def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], images_folder: str="images"):
     """
     [           Gen1        Gen2            Gen3
@@ -19,8 +22,8 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     :param total_fitnesses:
     :return:
     """
-    if not os.path.exists(images_folder + "/"):
-        os.mkdir(images_folder)
+    if not os.path.exists(f"{local_dir}/{images_folder}/"):
+        os.mkdir(f"{local_dir}/{images_folder}/")
 
     data = np.array(total_fitnesses)
 
@@ -28,6 +31,8 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     avg_max = []
     # The number of generations is the second dimension, because this matrix will have shape
     # N_Runs x N_Gen x 2
+    print(data.shape)
+    print(total_fitnesses)
     gens = list(range(data.shape[1]))
 
     # Append in two lists one array for each generation, and each array has all the mean values(/max values)
@@ -43,7 +48,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     std_average = np.std(avg_mean, axis=1)
     std_max = np.std(avg_max, axis=1)
 
-    plt.figure(0)
+    plt.figure()
     plt.xlabel("Generations")
     plt.ylabel("Fitness Value")
     plt.plot(gens, maximum, "k", color="red", label="Average of maximum fitness values")
@@ -51,8 +56,9 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     plt.fill_between(gens, average - std_average, average + std_average, color="lightsteelblue")
     plt.fill_between(gens, maximum - std_max, maximum + std_max, color="lightsteelblue")
     plt.legend()
-    plt.savefig(f"{images_folder}/{experiment_name}_line_plot.png", format="png")
-
+    print(f"Line plotting results of {experiment_name}")
+    plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_line_plot.png", format="png")
+    plt.clf()
     # average_fitnesses = np.mean(data, axis=1)
     # maximum_fitnesses = np.max(data, axis=1)
     # std_fit = np.std(data, axis=1)
@@ -72,14 +78,16 @@ def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
     :param images_folder:
     :return:
     """
-    if not os.path.exists(images_folder + "/"):
-        os.mkdir(images_folder)
+    if not os.path.exists(f"{local_dir}/{images_folder}/"):
+        os.mkdir(f"{local_dir}/{images_folder}/")
     data = np.array(best_fitnesses)
-    plt.figure(1)
+    plt.figure()
     plt.boxplot(data)
     plt.ylabel("Individual Gain")
     plt.xlabel(experiment_name)
-    plt.savefig(f"{images_folder}/{experiment_name}_box_plot.png", format="png")
+    print(f"Box plotting results of {experiment_name}")
+    plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_box_plot.png", format="png")
+    plt.clf()
 
 
 if __name__ == '__main__':

@@ -78,6 +78,7 @@ class Neat_Controller(Controller):
 			gen_idx = net[0]
 			fit = net[-1]
 			genomes[gen_idx][1].fitness = fit
+			del self.nets[idx][-1]
 		# 	OTHER POSSIBLE FITNESS FUNCTION IS: SUM OF(value of index of output - fitness)^2
 
 
