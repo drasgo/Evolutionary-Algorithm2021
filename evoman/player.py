@@ -179,7 +179,6 @@ class Player(pygame.sprite.Sprite):
 
                 # calls the controller providing game sensors
                 actions = game.player_controller.control(self.sensors.get(game), game.pcont)
-                # actions = game.player_controller.control(self.sensors.get(game), game.pcont, game.fitness_single())
                 if len(actions) < 5:
                     game.print_logs("ERROR: Player controller must return 5 decision variables.")
                     sys.exit(0)
