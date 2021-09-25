@@ -1,12 +1,11 @@
-# implements controller structure for player
-from evoman.controller import Controller
+import pygad.gann as gann
+from demo_controller import player_controller
 
-
-class GA_Controller(Controller):
-	def __init__(self):
-		return None
-		
-
-	def control(self, inputs, controller=None):
-		return None
-		
+class ga_controller(player_controller):
+    def __init__(self, population: int):
+        super().__init__(0)
+        self.evolving_networks = gann.GANN(
+            num_solutions = population,
+            num_neurons_input = 20,
+            num_neurons_output = 5,
+            output_activation = 'sigmoid')

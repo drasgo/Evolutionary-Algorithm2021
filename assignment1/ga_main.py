@@ -4,7 +4,7 @@ import pygad
 from typing import Callable, List, Tuple
 from numpy import datetime64
 
-from assignment1.controllers.ga_controller import GA_Controller as Controller
+from assignment1.controllers.ga_controller import ga_controller as Controller
 from assignment1.environment import Environment
 
 
@@ -71,4 +71,6 @@ headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-execute([2], 10)
+Controller(150)
+
+#execute([2], 10)
