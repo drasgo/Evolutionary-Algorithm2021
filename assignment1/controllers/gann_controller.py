@@ -15,7 +15,7 @@ def fitness_func(solution, sol_idx):
     controller.current_solution =sol_idx
     for enemy in controller.enemies:
         result = controller.environment.run_single(enemy, controller, "None")
-        fitnesses += (100 + result[1] - result[2]) / 2
+        fitnesses += result[0]
         #print(f"Fitness of solution {sol_idx} for enemy {enemy}: {result[0]}")
 
     total_fitness = fitnesses / len(controller.enemies)
@@ -43,7 +43,6 @@ class ga_controller(Controller):
 
         self.networks.create_population()
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
-        self.current_solution = 0
         self.enemies = enemies
         self.current_generation = 0
 
@@ -57,16 +56,16 @@ class ga_controller(Controller):
 
         self.algorithm = GA(
             num_generations = generations,
-            num_parents_mating = 2,
+            num_parents_mating = 5,
             initial_population = self.initial_population_vector.copy(),
             fitness_func = fitness_func,
             on_generation = callback_generation,
             parent_selection_type = "tournament",
-            keep_parents = 2,
-            K_tournament = 2,
+            keep_parents = 5,
+            K_tournament = population,
             crossover_type = "single_point",
             crossover_probability = 0.2,
-            mutation_probability = 0.05,
+            mutation_probability = 0.02,
             mutation_percent_genes = 0.01,
             allow_duplicate_genes = False)
 
