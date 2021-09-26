@@ -74,7 +74,7 @@ class ga_controller(Controller):
 
     def control(self, inputs: np.ndarray, controller=None):
         # nn.predict() returns an array with an integer for each input which represents the activated output neuron
-        prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs], dtype = np.float128))
+        prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs]))
         action = [0, 0, 0, 0, 0]
         action[round(prediction[0])] = 1
         return action
