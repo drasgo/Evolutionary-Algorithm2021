@@ -254,7 +254,7 @@ class New_Environment(Environment):
         "enemy#.py" files) for defining the controller of that enemy. Note that each enemy type has a different type of
         possible actions, so be careful with that when implementing your own enemy controller. If "None", then it will
         default to the deterministic hardcoded behaviours of that enemy.
-        :return: If the game is suddenly quit, it returns None. Otherwise, it returns 5 values:
+        :return: If the game is suddenly quit, it returns None. Otherwise, it returns 4 values:
         - fitness: a float value of the fitness at the end of that instance of the game.
         - player life: an integer value corresponding to the player's life at the end of the game.
         - enemy life: an integer value corresponding to the enemy's life at the end of the game.
