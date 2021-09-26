@@ -19,7 +19,7 @@ config = os.path.join(local_dir, "configs", "config-neat")
 
 name = "neat_specialist"
 enemies_numbers = [1, 2, 3, 4, 5, 6, 7, 8]
-gens = 10
+gens = 20
 number_of_different_runs = 10
 test = 5
 
@@ -44,7 +44,7 @@ def cycle(controller: Neat_Controller, environment: New_Environment) -> List[flo
     return fitness_nets
 
 
-def neat_test(controller, environment) -> float:
+def neat_test(controller, environment: New_Environment) -> float:
     """
     Test the best network of the population, with the current environment
     :param controller:
@@ -55,8 +55,9 @@ def neat_test(controller, environment) -> float:
     best_network = neat.nn.FeedForwardNetwork.create(best_genome, controller.configs)
     means = []
     for idx in range(test):
-        fitness, _, _, _ = environment.play(pcont=[None, None, best_network])
-        means.append(fitness)
+        fitness, player_life, enemy_life, _ = environment.play(pcont=[None, None, best_network])
+
+        means.append(player_life - enemy_life)
     return sum(means)/len(means)
 
 
