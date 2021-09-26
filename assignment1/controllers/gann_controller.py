@@ -1,3 +1,6 @@
+from numpy.random.mtrand import f
+from pygad.gann.gann import population_as_matrices
+from demo_controller import player_controller
 import numpy as np
 import pygad.gann as gann
 import pygad.nn as nn
@@ -5,29 +8,59 @@ import pygad.nn as nn
 from pygad import GA
 
 from evoman.controller import Controller
-
-fitnesses = {}
+from assignment1.environment import New_Environment as Environment
 
 def fitness_func(solution, sol_idx):
-    return fitnesses[sol_idx]
+    fitnesses = 0
+    controller.current_solution =sol_idx
+    for enemy in controller.enemies:
+        result = controller.environment.run_single(enemy, controller, "None")
+        fitnesses += (100 + result[1] - result[2]) / 2
+        #print(f"Fitness of solution {sol_idx} for enemy {enemy}: {result[0]}")
+
+    total_fitness = fitnesses / len(controller.enemies)
+    #if len(controller.enemies) > 1:
+    print(f"Total fitness of solution {sol_idx}: {total_fitness}")
+        
+    return total_fitness
+
+def callback_generation(ga_instance):
+    controller.current_generation += 1
+
+    print(f"Generation {controller.current_generation}:")
+
+    population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
+    controller.networks.update_population_trained_weights(population_matrice)
+
 
 class ga_controller(Controller):
-    def __init__(self, population: int, generations: int):
+    def __init__(self, population: int, generations: int, enemies: list):
         self.networks = gann.GANN(
             num_solutions = population,
             num_neurons_input = 20,
             num_neurons_output = 5,
             output_activation = 'sigmoid')
-        
+
         self.networks.create_population()
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
         self.current_solution = 0
+        self.enemies = enemies
+        self.current_generation = 0
+
+        self.environment = Environment(
+            experiment_name="ga_specialist",
+            enemies=enemies,
+            playermode="ai",
+            player_controller=self,
+            enemymode="static",
+            speed="fastest")
 
         self.algorithm = GA(
             num_generations = generations,
             num_parents_mating = 2,
             initial_population = self.initial_population_vector.copy(),
             fitness_func = fitness_func,
+            on_generation = callback_generation,
             parent_selection_type = "tournament",
             keep_parents = 2,
             K_tournament = 2,
@@ -37,20 +70,12 @@ class ga_controller(Controller):
             mutation_percent_genes = 0.01,
             allow_duplicate_genes = False)
 
-    def execute(self, solution_index, fitness):
-        fitnesses[solution_index] = fitness
-        self.current_solution += 1
-        self.algorithm.run()
+        global controller
+        controller = self
 
     def control(self, inputs: np.ndarray, controller=None):
-        prediction = nn.predict(last_layer = self.networks.population_networks[self.current_solution], data_inputs = inputs)
-        print(prediction)
-        action = [1 if value > 0.5 else 0 for value in prediction]
-        print(action)
+        # nn.predict() returns an array with an integer for each input which represents the activated output neuron
+        prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs]))
+        action = [0, 0, 0, 0, 0]
+        action[round(prediction[0])] = 1
         return action
-
-    def evolve_networks(self):
-        print(fitnesses)
-        fitnesses.clear()
-        self.current_solution = 0
-        return None
