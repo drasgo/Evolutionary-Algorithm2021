@@ -78,3 +78,7 @@ class ga_controller(Controller):
         action = [0, 0, 0, 0, 0]
         action[round(prediction[0])] = 1
         return action
+
+    def execute(self):
+        self.algorithm.run()
+        self.algorithm.plot_fitness()
