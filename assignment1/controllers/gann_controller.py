@@ -20,14 +20,14 @@ def fitness_func(solution, sol_idx):
 
     total_fitness = fitnesses / len(controller.enemies)
     #if len(controller.enemies) > 1:
-    print(f"Total fitness of solution {sol_idx}: {total_fitness}")
+    #print(f"Total fitness of solution {sol_idx}: {total_fitness}")
         
     return total_fitness
 
 def callback_generation(ga_instance):
     controller.current_generation += 1
 
-    print(f"Generation {controller.current_generation}:")
+    #print(f"Generation {controller.current_generation}:")
 
     population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
     controller.networks.update_population_trained_weights(population_matrice)
@@ -67,7 +67,8 @@ class ga_controller(Controller):
             crossover_probability = 0.2,
             mutation_probability = 0.02,
             mutation_percent_genes = 0.01,
-            allow_duplicate_genes = False)
+            allow_duplicate_genes = False,
+            save_best_solutions = True)
 
         global controller
         controller = self
@@ -81,4 +82,4 @@ class ga_controller(Controller):
 
     def execute(self):
         self.algorithm.run()
-        self.algorithm.plot_fitness()
+        return self.algorithm.best_solution()
