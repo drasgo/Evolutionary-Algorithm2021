@@ -22,6 +22,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     :param total_fitnesses:
     :return:
     """
+    # TODO save averages and max values in file, so to be able to dounle check later on in case of necessity
     if not os.path.exists(f"{local_dir}/{images_folder}/"):
         os.mkdir(f"{local_dir}/{images_folder}/")
 

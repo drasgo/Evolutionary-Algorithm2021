@@ -61,9 +61,16 @@ class New_Environment(Environment):
         Function representing the fitness formula:
         (100 - enemy_life)^alpha - (100 - player_life)^beta -
         (( Σ(100 - player life throughout time)) / time)^gamma
+        and then rescaled between 0 and 100
         """
-        return (100 - self.get_enemylife()) - (100 - self.get_playerlife()) ** 2 - \
-                  (np.sum(100 - np.array(self.player_life_timeseries)) / self.get_time() ** 2)
+        old_max = 100
+        old_min = -10000
+        new_max = 100
+        new_min = 0
+        fitness_value = (100 - self.get_enemylife()) - (100 - self.get_playerlife()) ** 2 - \
+                  (np.sum(100 - np.array(self.player_life_timeseries)) / self.get_time()) ** 2
+        rescaled_value = (new_max - new_min) / (old_max - old_min) * (fitness_value - old_max) + new_max
+        return rescaled_value
 
     def run_single(self, enemyn: int, pcont, econt):
         """
