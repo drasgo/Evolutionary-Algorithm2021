@@ -12,7 +12,7 @@ headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
-for enemy in range(1, 9, 1):
-    best_fitness = run(150, 50, [enemy])[1]
+for enemy in [2, 4, 5]:
+    best_fitness = run(5, 5, [enemy])[1]
     print(f"Best fitness for enemy {enemy} was {best_fitness}")
 

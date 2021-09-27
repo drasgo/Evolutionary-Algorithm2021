@@ -1,34 +1,46 @@
 from numpy.random.mtrand import f
 from pygad.gann.gann import population_as_matrices
 from demo_controller import player_controller
+
 import numpy as np
 import pygad.gann as gann
 import pygad.nn as nn
+import os
+import csv
 
 from pygad import GA
+from datetime import datetime
 
 from evoman.controller import Controller
 from assignment1.environment import New_Environment as Environment
 
+
 def fitness_func(solution, sol_idx):
     fitnesses = 0
-    controller.current_solution =sol_idx
+    gains = 0
+    controller.current_solution = sol_idx
+
     for enemy in controller.enemies:
         result = controller.environment.run_single(enemy, controller, "None")
         fitnesses += result[0]
-        #print(f"Fitness of solution {sol_idx} for enemy {enemy}: {result[0]}")
+        gains = result[1] - result[2]
 
     total_fitness = fitnesses / len(controller.enemies)
-    #if len(controller.enemies) > 1:
-    #print(f"Total fitness of solution {sol_idx}: {total_fitness}")
+    controller.fitnesses.append(total_fitness)
+
+    total_gains = gains / len(controller.enemies)
+    if total_gains > controller.current_best[0]:
+        controller.current_best[0] = total_gains
+        controller.current_best[1] = solution
         
     return total_fitness
 
+
 def callback_generation(ga_instance):
     controller.current_generation += 1
-
-    #print(f"Generation {controller.current_generation}:")
-
+    controller.plotting_fitnesses[0].append(sum(controller.fitnesses) / len(controller.fitnesses))
+    controller.plotting_fitnesses[1].append(max(controller.fitnesses))
+    controller.fitnesses.clear()
     population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
     controller.networks.update_population_trained_weights(population_matrice)
 
@@ -45,6 +57,9 @@ class ga_controller(Controller):
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
         self.enemies = enemies
         self.current_generation = 0
+        self.fitnesses = []
+        self.current_best = [-100, []]
+        self.plotting_fitnesses = [[], []]
 
         self.environment = Environment(
             experiment_name="ga_specialist",
@@ -82,4 +97,25 @@ class ga_controller(Controller):
 
     def execute(self):
         self.algorithm.run()
-        return self.algorithm.best_solution()
+
+        parent_dir = os.path.dirname(os.path.dirname(__file__))
+        if not os.path.exists(f"{parent_dir}/results/"):
+            os.mkdir(f"{parent_dir}/results/")
+        target_dir = f"{parent_dir}/results/ga"
+        if not os.path.exists(target_dir):
+            os.mkdir(target_dir)
+        
+        enemy_string = f""
+        for enemy in self.enemies:
+            enemy_string += f"{enemy}_"
+
+        timestamp = datetime.now().strftime("%y%m%d%H%M%S")
+
+        print(self.plotting_fitnesses)
+        
+        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}.csv", "w") as file:
+            writer = csv.writer(file)
+            writer.writerows(self.plotting_fitnesses)
+
+    def test_best_solution(self, solution):
+        return 0
