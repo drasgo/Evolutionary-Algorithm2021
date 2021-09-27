@@ -1,3 +1,4 @@
+from typing import List
 from numpy.random.mtrand import f
 from pygad.gann.gann import population_as_matrices
 from demo_controller import player_controller
@@ -30,16 +31,14 @@ def fitness_func(solution, sol_idx):
 
     total_gains = gains / len(controller.enemies)
     if total_gains > controller.current_best[0]:
-        controller.current_best[0] = total_gains
-        controller.current_best[1] = solution
+        controller.current_best = [total_gains, solution]
         
     return total_fitness
 
 
 def callback_generation(ga_instance):
     controller.current_generation += 1
-    controller.plotting_fitnesses[0].append(sum(controller.fitnesses) / len(controller.fitnesses))
-    controller.plotting_fitnesses[1].append(max(controller.fitnesses))
+    controller.plotting_fitnesses.append([sum(controller.fitnesses) / len(controller.fitnesses), max(controller.fitnesses)])
     controller.fitnesses.clear()
     population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
     controller.networks.update_population_trained_weights(population_matrice)
@@ -59,7 +58,7 @@ class ga_controller(Controller):
         self.current_generation = 0
         self.fitnesses = []
         self.current_best = [-100, []]
-        self.plotting_fitnesses = [[], []]
+        self.plotting_fitnesses = []
 
         self.environment = Environment(
             experiment_name="ga_specialist",
@@ -110,12 +109,26 @@ class ga_controller(Controller):
             enemy_string += f"{enemy}_"
 
         timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-
-        print(self.plotting_fitnesses)
         
-        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}.csv", "w") as file:
-            writer = csv.writer(file)
-            writer.writerows(self.plotting_fitnesses)
+        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_lpv.csv", "w") as lpv_file:
+            writer_l = csv.writer(lpv_file)
+            writer_l.writerows(self.plotting_fitnesses)
 
-    def test_best_solution(self, solution):
-        return 0
+        fitnesses_of_best = self.test_best_solution(self.current_best[1])
+
+        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_bpv.csv", "w") as bpv_file:
+            writer_b = csv.writer(bpv_file)
+            writer_b.writerow(fitnesses_of_best)
+
+    def test_best_solution(self, solution) -> List[float]:
+        results = []
+
+        test_input_layer = nn.InputLayer(20)
+        test_output_layer = nn.DenseLayer(5, test_input_layer)
+        test_output_layer.initial_weights = solution
+        self.networks.population_networks = [test_output_layer]
+
+        for idx in range(5):
+            results.append(fitness_func(solution, 0))
+
+        return results
