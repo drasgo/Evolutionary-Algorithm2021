@@ -49,6 +49,15 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     std_average = np.std(avg_mean, axis=1)
     std_max = np.std(avg_max, axis=1)
 
+    if not os.path.exists(f"{local_dir}/debug/"):
+        os.mkdir(f"{local_dir}/debug/")
+
+    open(f"{local_dir}/{images_folder}/{experiment_name}_max_values.txt", "w").write(str(avg_max))
+    open(f"{local_dir}/{images_folder}/{experiment_name}_average_max_values.txt", "w").write(str(maximum))
+
+    open(f"{local_dir}/{images_folder}/{experiment_name}_mean_values.txt", "w").write(str(avg_mean))
+    open(f"{local_dir}/{images_folder}/{experiment_name}_average_mean_values.txt", "w").write(str(average))
+
     plt.figure()
     plt.xlabel("Generations")
     plt.ylabel("Fitness Value")
