@@ -64,7 +64,7 @@ class New_Environment(Environment):
         and then rescaled between 0 and 100
         """
         old_max = 100
-        old_min = -10000
+        old_min = -20000
         new_max = 100
         new_min = 0
         fitness_value = (100 - self.get_enemylife()) - (100 - self.get_playerlife()) ** 2 - \
