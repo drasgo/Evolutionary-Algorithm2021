@@ -18,20 +18,16 @@ from assignment1.environment import New_Environment as Environment
 
 def fitness_func(solution, sol_idx):
     fitnesses = 0
-    gains = 0
     controller.current_solution = sol_idx
 
     for enemy in controller.enemies:
         result = controller.environment.run_single(enemy, controller, "None")
         fitnesses += result[0]
-        gains = result[1] - result[2]
 
     total_fitness = fitnesses / len(controller.enemies)
     controller.fitnesses.append(total_fitness)
-
-    total_gains = gains / len(controller.enemies)
-    if total_gains > controller.current_best[0]:
-        controller.current_best = [total_gains, solution]
+    if total_fitness > controller.current_best[0]:
+        controller.current_best = [total_fitness, solution]
         
     return total_fitness
 
@@ -57,7 +53,7 @@ class ga_controller(Controller):
         self.enemies = enemies
         self.current_generation = 0
         self.fitnesses = []
-        self.current_best = [-100, []]
+        self.current_best = [0, []]
         self.plotting_fitnesses = []
 
         self.environment = Environment(
@@ -121,14 +117,24 @@ class ga_controller(Controller):
             writer_b.writerow(fitnesses_of_best)
 
     def test_best_solution(self, solution) -> List[float]:
-        results = []
+        gains = []
 
         test_input_layer = nn.InputLayer(20)
         test_output_layer = nn.DenseLayer(5, test_input_layer)
         test_output_layer.initial_weights = solution
         self.networks.population_networks = [test_output_layer]
+        self.current_solution = 0
 
         for idx in range(5):
-            results.append(fitness_func(solution, 0))
+            gains.append(self.gain_func())
 
-        return results
+        return gains
+
+    def gain_func(self):
+        gains = 0
+
+        for enemy in self.enemies:
+            result = self.environment.run_single(enemy, self, "None")
+            gains += (result[1] - result[2])
+            
+        return (gains / len(self.enemies))
