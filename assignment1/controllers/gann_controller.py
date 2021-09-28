@@ -1,8 +1,3 @@
-from typing import List
-from numpy.random.mtrand import f
-from pygad.gann.gann import population_as_matrices
-from demo_controller import player_controller
-
 import numpy as np
 import pygad.gann as gann
 import pygad.nn as nn
@@ -18,16 +13,34 @@ from assignment1.environment import New_Environment as Environment
 
 def fitness_func(solution, sol_idx):
     fitnesses = 0
+    gains = 0
     controller.current_solution = sol_idx
 
     for enemy in controller.enemies:
         result = controller.environment.run_single(enemy, controller, "None")
         fitnesses += result[0]
+        gains += (result[1] - result[2])
+
+    gains = gains / len(controller.enemies)
 
     total_fitness = fitnesses / len(controller.enemies)
     controller.fitnesses.append(total_fitness)
+
     if total_fitness > controller.current_best[0]:
-        controller.current_best = [total_fitness, solution]
+        gains_of_best = [gains]
+        fitnesses_of_best = [fitnesses]
+        for idx in range(4):
+            gains = 0
+            fitnesses = 0
+            for enemy in controller.enemies:
+                result = controller.environment.run_single(enemy, controller, "None")
+                fitnesses += result[0]
+                gains += (result[1] - result[2])  
+            gains = gains / len(controller.enemies)
+            gains_of_best.append(gains)
+            fitnesses = fitnesses / len(controller.enemies)
+            fitnesses_of_best.append(fitnesses)
+        controller.current_best = [total_fitness, solution, gains_of_best, fitnesses_of_best]
         
     return total_fitness
 
@@ -45,8 +58,10 @@ class ga_controller(Controller):
         self.networks = gann.GANN(
             num_solutions = population,
             num_neurons_input = 20,
+            num_neurons_hidden_layers = [10],
             num_neurons_output = 5,
-            output_activation = 'sigmoid')
+            output_activation = "sigmoid",
+            hidden_activations = "sigmoid")
 
         self.networks.create_population()
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
@@ -57,28 +72,28 @@ class ga_controller(Controller):
         self.plotting_fitnesses = []
 
         self.environment = Environment(
-            experiment_name="ga_specialist",
-            enemies=enemies,
-            playermode="ai",
-            player_controller=self,
-            enemymode="static",
-            speed="fastest")
+            experiment_name = "ga_specialist",
+            enemies = enemies,
+            playermode = "ai",
+            player_controller = self,
+            enemymode = "static",
+            speed = "fastest",
+            randomini = "yes")
 
         self.algorithm = GA(
             num_generations = generations,
-            num_parents_mating = 5,
+            num_parents_mating = 2,
             initial_population = self.initial_population_vector.copy(),
             fitness_func = fitness_func,
             on_generation = callback_generation,
             parent_selection_type = "tournament",
-            keep_parents = 5,
+            keep_parents = (population / 10),
             K_tournament = population,
             crossover_type = "single_point",
-            crossover_probability = 0.2,
-            mutation_probability = 0.02,
-            mutation_percent_genes = 0.01,
-            allow_duplicate_genes = False,
-            save_best_solutions = True)
+            crossover_probability = 0.8,
+            mutation_probability = 0.2,
+            mutation_percent_genes = 0.1,
+            allow_duplicate_genes = False)
 
         global controller
         controller = self
@@ -110,31 +125,6 @@ class ga_controller(Controller):
             writer_l = csv.writer(lpv_file)
             writer_l.writerows(self.plotting_fitnesses)
 
-        fitnesses_of_best = self.test_best_solution(self.current_best[1])
-
         with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_bpv.csv", "w") as bpv_file:
             writer_b = csv.writer(bpv_file)
-            writer_b.writerow(fitnesses_of_best)
-
-    def test_best_solution(self, solution) -> List[float]:
-        gains = []
-
-        test_input_layer = nn.InputLayer(20)
-        test_output_layer = nn.DenseLayer(5, test_input_layer)
-        test_output_layer.initial_weights = solution
-        self.networks.population_networks = [test_output_layer]
-        self.current_solution = 0
-
-        for idx in range(5):
-            gains.append(self.gain_func())
-
-        return gains
-
-    def gain_func(self):
-        gains = 0
-
-        for enemy in self.enemies:
-            result = self.environment.run_single(enemy, self, "None")
-            gains += (result[1] - result[2])
-            
-        return (gains / len(self.enemies))
+            writer_b.writerows([self.current_best])
