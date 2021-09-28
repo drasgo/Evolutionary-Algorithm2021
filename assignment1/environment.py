@@ -30,7 +30,8 @@ class New_Environment(Environment):
                  fullscreen=False,  # True or False
                  player_controller=None,  # controller object
                  enemy_controller=None,  # controller object
-                 use_joystick=False):
+                 use_joystick=False,
+                 graphics: bool=False):
         super().__init__(experiment_name,
                          multiplemode,
                          enemies,
@@ -55,6 +56,7 @@ class New_Environment(Environment):
                          enemy_controller,
                          use_joystick)
         self.player_life_timeseries = []
+        self.graphics = graphics
 
     def fitness_single(self) -> float:
         """
@@ -71,6 +73,9 @@ class New_Environment(Environment):
                   (np.sum(100 - np.array(self.player_life_timeseries)) / self.get_time()) ** 2
         rescaled_value = (new_max - new_min) / (old_max - old_min) * (fitness_value - old_max) + new_max
         return rescaled_value
+
+    def set_graphics(self, graphics: bool):
+        self.graphics = graphics
 
     def run_single(self, enemyn: int, pcont, econt):
         """
@@ -151,24 +156,27 @@ class New_Environment(Environment):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     return
 
+            if self.graphics:
+                self.screen.fill((250, 250, 250))
+
             # updates objects and draws its itens on screen
-            # self.screen.fill((250, 250, 250))
             self.tilemap.update(33 / 1000., self)
             self.tilemap.draw(self.screen)
 
-            # # player life bar
-            # vbar = int(100 * (1 - (self.player.life / float(self.player.max_life))))
-            # pygame.draw.line(self.screen, (0, 0, 0), [40, 40], [140, 40], 2)
-            # pygame.draw.line(self.screen, (0, 0, 0), [40, 45], [140, 45], 5)
-            # pygame.draw.line(self.screen, (150, 24, 25), [40, 45], [140 - vbar, 45], 5)
-            # pygame.draw.line(self.screen, (0, 0, 0), [40, 49], [140, 49], 2)
-            #
-            # # enemy life bar
-            # vbar = int(100 * (1 - (self.enemy.life / float(self.enemy.max_life))))
-            # pygame.draw.line(self.screen, (0, 0, 0), [590, 40], [695, 40], 2)
-            # pygame.draw.line(self.screen, (0, 0, 0), [590, 45], [695, 45], 5)
-            # pygame.draw.line(self.screen, (194, 118, 55), [590, 45], [695 - vbar, 45], 5)
-            # pygame.draw.line(self.screen, (0, 0, 0), [590, 49], [695, 49], 2)
+            if self.graphics:
+                # # player life bar
+                vbar = int(100 * (1 - (self.player.life / float(self.player.max_life))))
+                pygame.draw.line(self.screen, (0, 0, 0), [40, 40], [140, 40], 2)
+                pygame.draw.line(self.screen, (0, 0, 0), [40, 45], [140, 45], 5)
+                pygame.draw.line(self.screen, (150, 24, 25), [40, 45], [140 - vbar, 45], 5)
+                pygame.draw.line(self.screen, (0, 0, 0), [40, 49], [140, 49], 2)
+                #
+                # # enemy life bar
+                vbar = int(100 * (1 - (self.enemy.life / float(self.enemy.max_life))))
+                pygame.draw.line(self.screen, (0, 0, 0), [590, 40], [695, 40], 2)
+                pygame.draw.line(self.screen, (0, 0, 0), [590, 45], [695, 45], 5)
+                pygame.draw.line(self.screen, (194, 118, 55), [590, 45], [695 - vbar, 45], 5)
+                pygame.draw.line(self.screen, (0, 0, 0), [590, 49], [695, 49], 2)
             #
             # if self.start == False and self.playermode == "human":
             #     myfont = pygame.font.SysFont("Comic sams", 100)
@@ -225,8 +233,9 @@ class New_Environment(Environment):
             if self.loadenemy == "no":  # removes enemy sprite from game
                 self.enemy.kill()
 
+            if self.graphics:
                 # updates screen
-            # pygame.display.flip()
+                pygame.display.flip()
 
             # game runtime limit
             if self.playermode == 'ai':

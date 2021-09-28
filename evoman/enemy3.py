@@ -212,7 +212,7 @@ class Enemy(pygame.sprite.Sprite):
 
                 # bullets sound effect
                 if game.sound == "on" and game.playermode == "human":
-                    sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                    sound = pygame.mixer.Sound(local_dir + '/sounds/scifi011.wav')
                     c = pygame.mixer.Channel(3)
                     c.set_volume(10)
                     c.play(sound)
@@ -266,7 +266,7 @@ class Bullet_e3(pygame.sprite.Sprite):
 
 
 
-    image = pygame.image.load('evoman/images/met.png')
+    image = pygame.image.load(local_dir + '/images/met.png')
 
     def __init__(self, location, direction, btype, n_twist, *groups):
         super(Bullet_e3, self).__init__(*groups)
@@ -283,9 +283,9 @@ class Bullet_e3(pygame.sprite.Sprite):
 
 
         if game.time%2==0:
-            self.image = pygame.image.load('evoman/images/met.png')
+            self.image = pygame.image.load(local_dir + '/images/met.png')
         else:
-            self.image = pygame.image.load('evoman/images/met2.png')
+            self.image = pygame.image.load(local_dir + '/images/met2.png')
 
 
         # decreases bullet's timer

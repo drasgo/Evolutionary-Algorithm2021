@@ -3,15 +3,9 @@
 # Author: Karine Miras         #
 # karine.smiras@gmail.com      #
 ################################
-import os
 import sys
 import numpy
-import random
-
-import evoman.Base
-from evoman.Base.SpriteConstants import *
 from evoman.Base.SpriteDefinition import *
-from evoman.sensors import Sensors
 
 local_dir = os.path.dirname(__file__)
 
@@ -203,7 +197,7 @@ class Enemy(pygame.sprite.Sprite):
 
                  # bullets sound effect
                 if game.sound == "on" and game.playermode == "human":
-                    sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                    sound = pygame.mixer.Sound(local_dir + '/sounds/scifi011.wav')
                     c = pygame.mixer.Channel(3)
                     c.set_volume(10)
                     c.play(sound)
@@ -244,7 +238,7 @@ class Enemy(pygame.sprite.Sprite):
 class Bullet_e2(pygame.sprite.Sprite):
 
 
-    image = pygame.image.load('evoman/images/torna.png')
+    image = pygame.image.load(local_dir + '/images/torna.png')
 
     def __init__(self, location, direction,n, n_twist , *groups):
         super(Bullet_e2, self).__init__(*groups)
@@ -259,9 +253,9 @@ class Bullet_e2(pygame.sprite.Sprite):
     def update(self, dt, game):
 
         if game.time%2==0:
-            self.image = pygame.image.load('evoman/images/torna.png')
+            self.image = pygame.image.load(local_dir + '/images/torna.png')
         else:
-            self.image = pygame.image.load('evoman/images/torna2.png')
+            self.image = pygame.image.load(local_dir + '/images/torna2.png')
 
 
         # removes bullets objetcs when they transpass the screen limits

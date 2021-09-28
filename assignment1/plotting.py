@@ -1,10 +1,14 @@
+import json
 import os
 from typing import List
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+font = {'family' : 'normal',
+        'size'   : 12}
+matplotlib.rc('font', **font)
 local_dir = os.path.dirname(__file__)
 
 
@@ -32,9 +36,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     avg_max = []
     # The number of generations is the second dimension, because this matrix will have shape
     # N_Runs x N_Gen x 2
-    print(data.shape)
-    print(total_fitnesses)
-    gens = list(range(data.shape[1]))
+    gens = list(range(1, data.shape[1] + 1))
 
     # Append in two lists one array for each generation, and each array has all the mean values(/max values)
     # for the considered generation
@@ -49,14 +51,26 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     std_average = np.std(avg_mean, axis=1)
     std_max = np.std(avg_max, axis=1)
 
+    save_max = np.array(avg_max).tolist()
+    save_avg = np.array(avg_mean).tolist()
+
     if not os.path.exists(f"{local_dir}/debug/"):
         os.mkdir(f"{local_dir}/debug/")
 
-    open(f"{local_dir}/{images_folder}/{experiment_name}_max_values.txt", "w").write(str(avg_max))
-    open(f"{local_dir}/{images_folder}/{experiment_name}_average_max_values.txt", "w").write(str(maximum))
+    save = {
+        "max_values": save_max,
+        "average_max_values": maximum.tolist(),
+        "mean_values": save_avg,
+        "average_mean_values": average.tolist()
+    }
 
-    open(f"{local_dir}/{images_folder}/{experiment_name}_mean_values.txt", "w").write(str(avg_mean))
-    open(f"{local_dir}/{images_folder}/{experiment_name}_average_mean_values.txt", "w").write(str(average))
+    with open(f"{local_dir}/debug/{experiment_name}.json", "w") as fp:
+        json.dump(save, fp)
+    # open(f"{local_dir}/{images_folder}/{experiment_name}_max_values.txt", "w").write(str(save_max))
+    # open(f"{local_dir}/{images_folder}/{experiment_name}_average_max_values.txt", "w").write(str(maximum))
+    #
+    # open(f"{local_dir}/{images_folder}/{experiment_name}_mean_values.txt", "w").write(str(save_avg))
+    # open(f"{local_dir}/{images_folder}/{experiment_name}_average_mean_values.txt", "w").write(str(average))
 
     plt.figure()
     plt.xlabel("Generations")

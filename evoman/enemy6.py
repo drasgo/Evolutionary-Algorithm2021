@@ -144,7 +144,7 @@ class Enemy(pygame.sprite.Sprite):
 
                 # bullets sound effect
                 if game.sound == "on" and game.playermode == "human":
-                    sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                    sound = pygame.mixer.Sound(local_dir + '/sounds/scifi011.wav')
                     c = pygame.mixer.Channel(3)
                     c.set_volume(10)
                     c.play(sound)
@@ -253,7 +253,7 @@ class Bullet_e6(pygame.sprite.Sprite):
 
 
 
-    image = pygame.image.load('evoman/images/mi2.png')
+    image = pygame.image.load(local_dir + '/images/mi2.png')
 
     def __init__(self, location, direction, n_twist, *groups):
         super(Bullet_e6, self).__init__(*groups)

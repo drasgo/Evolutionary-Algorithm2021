@@ -231,7 +231,7 @@ class Enemy(pygame.sprite.Sprite):
             # Bullets sound effect.
             if game.sound == "on" and game.playermode == "human":
 
-                sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                sound = pygame.mixer.Sound(local_dir + '/sounds/scifi011.wav')
                 c = pygame.mixer.Channel(3)
                 c.set_volume(10)
                 c.play(sound)
