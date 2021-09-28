@@ -161,9 +161,9 @@ class New_Environment(Environment):
 
             # updates objects and draws its itens on screen
             self.tilemap.update(33 / 1000., self)
-            self.tilemap.draw(self.screen)
 
             if self.graphics:
+                self.tilemap.draw(self.screen)
                 # # player life bar
                 vbar = int(100 * (1 - (self.player.life / float(self.player.max_life))))
                 pygame.draw.line(self.screen, (0, 0, 0), [40, 40], [140, 40], 2)

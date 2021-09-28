@@ -9,7 +9,7 @@ from assignment1.environment import New_Environment
 from assignment1.plotting import line_plot, box_plot
 
 # For Pygame: True for not using visuals and thus making experiments faster
-headless = True
+headless = False
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -17,10 +17,11 @@ if headless:
 local_dir = os.path.dirname(__file__)
 config = os.path.join(local_dir, "configs", "config-neat")
 
+TRAINED_AGENTS_FOLDER = "trained_neat_agents"
 name = "neat_specialist"
 enemies_numbers = [1, 2, 3, 4, 5, 6, 7, 8]
-gens = 3
-number_of_different_runs = 4
+gens = 20
+number_of_different_runs = 10
 test = 5
 
 
@@ -53,7 +54,7 @@ def neat_test(controller, environment: New_Environment, enemy: int, run: int) ->
     """
     best_genome = controller.stats.best_unique_genomes(1)[0]
 
-    with open(f"neat_genome_enemy{enemy}_run{run}", "wb") as fp:
+    with open(f"{local_dir}/{TRAINED_AGENTS_FOLDER}/neat_genome_enemy{enemy}_run{run}", "wb") as fp:
         pickle.dump(best_genome, fp)
     best_network = neat.nn.FeedForwardNetwork.create(best_genome, controller.configs)
     means = []
@@ -108,14 +109,16 @@ def separate_test(file_name: str, enemy: int):
                                   playermode="ai",
                                   player_controller=controller,
                                   enemymode="static",
-                                  speed="fastest",
-                                  graphics=not headless)
-    with open(file_name, "wb") as fp:
-        genome = pickle.load(fp)
-    best_network = neat.nn.FeedForwardNetwork.create(genome, controller.configs)
-    fitness, player_life, enemy_life, _ = environment.play(pcont=[None, None, best_network])
-
+                                  speed="normal",
+                                  graphics=True)
+    try:
+        with open(f"{local_dir}/{TRAINED_AGENTS_FOLDER}/{file_name}", "rb") as fp:
+            genome = pickle.load(fp)
+        best_network = neat.nn.FeedForwardNetwork.create(genome, controller.configs)
+        fitness, player_life, enemy_life, _ = environment.play(pcont=[None, None, best_network])
+    except Exception as e:
+        print(f"Error {e}")
 
 if __name__ == '__main__':
-    run()
-
+    # run()
+    separate_test("neat_genome_enemy1_run1", 1)
