@@ -72,6 +72,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     # open(f"{local_dir}/{images_folder}/{experiment_name}_average_mean_values.txt", "w").write(str(average))
 
     plt.figure()
+    plt.title(f"{experiment_name.replace('_', ' ')}")
     plt.xlabel("Generations")
     plt.ylabel("Fitness Value")
     plt.plot(gens, maximum, "k", color="red", label="Average of maximum fitness values")
@@ -105,6 +106,7 @@ def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
         os.mkdir(f"{local_dir}/{images_folder}/")
     data = np.array(best_fitnesses)
     plt.figure()
+    plt.title(f"{experiment_name.replace('_', ' ')}")
     plt.boxplot(data)
     plt.ylabel("Individual Gain")
     plt.xlabel(experiment_name)

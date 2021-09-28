@@ -25,6 +25,11 @@ number_of_different_runs = 10
 test = 5
 
 
+def check_folder(folder):
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+
+
 def cycle(controller: Neat_Controller, environment: New_Environment) -> List[float]:
     print("starting cycle")
     print("preparing new networks")
@@ -54,6 +59,7 @@ def neat_test(controller, environment: New_Environment, enemy: int, run: int) ->
     """
     best_genome = controller.stats.best_unique_genomes(1)[0]
 
+    check_folder(f"{local_dir}/{TRAINED_AGENTS_FOLDER}")
     with open(f"{local_dir}/{TRAINED_AGENTS_FOLDER}/neat_genome_enemy{enemy}_run{run}", "wb") as fp:
         pickle.dump(best_genome, fp)
     best_network = neat.nn.FeedForwardNetwork.create(best_genome, controller.configs)
@@ -103,6 +109,10 @@ def run():
 
 
 def separate_test(file_name: str, enemy: int):
+    if headless:
+        print("Allow graphics for testing. Exiting")
+        return
+
     controller = Neat_Controller(config)
     environment = New_Environment(experiment_name=name + str(enemy),
                                   enemies=[enemy],
@@ -120,5 +130,5 @@ def separate_test(file_name: str, enemy: int):
         print(f"Error {e}")
 
 if __name__ == '__main__':
-    # run()
-    separate_test("neat_genome_enemy1_run1", 1)
+    run()
+    # separate_test("neat_genome_enemy2_run9", 2)
