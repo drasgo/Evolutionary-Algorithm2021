@@ -1,5 +1,6 @@
 import json
 import os
+import csv
 from typing import List
 
 import matplotlib
@@ -108,19 +109,47 @@ def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
     plt.figure()
     plt.title(f"{experiment_name.replace('_', ' ')}")
     plt.boxplot(data)
-    plt.ylabel("Individual Gain")
+    plt.ylabel("Individual Fitness")
     plt.xlabel(experiment_name)
     print(f"Box plotting results of {experiment_name}")
     plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_box_plot.png", format="png")
     plt.clf()
 
 
+def plot_from_files(folder: str, enemies):
+    files = os.listdir(folder)
+    for enemy in enemies:
+        enemy_files = [file for file in files if f"ga_solution_{enemy}" in file]
+        lp_files = [file for file in enemy_files if "lpv" in file]
+        bp_files = [file for file in enemy_files if "bpv" in file]
+
+        box_plot_from_files(folder, bp_files, enemy)
+        line_plot_from_files(folder, lp_files, enemy)
+
+def box_plot_from_files(folder, files, enemy):
+    return 0
+
+def line_plot_from_files(folder, files, enemy):
+    values = []
+    idx = 0
+    for file in files:
+        values.append([])
+        with open(f"{folder}/{file}") as csvfile:
+            reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
+            for row in reader:
+                if row != []:
+                    values[idx].append(row)
+        idx += 1
+    line_plot(f"ga_{enemy}", values)
+
+
 if __name__ == '__main__':
     # tot_test = [[1.,0.5,1.5], [2.,1.,3.], [3.,2.,4.]]
-    tot_test = [[[1., 0.5], [2.,5.], [3.,6.]],
-                [[2., 1.5], [3.,4.], [2.5,5.5]]]
-    best_test = [0.4,2,2.5, 3.3]
-    line_plot("", tot_test)
-    box_plot("", best_test)
-
+    # tot_test = [[[1., 0.5], [2.,5.], [3.,6.]],
+    #             [[2., 1.5], [3.,4.], [2.5,5.5]]]
+    # best_test = [0.4,2,2.5, 3.3]
+    # line_plot("", tot_test)
+    # box_plot("", best_test)
+    enemies = [1, 2, 3, 4, 5, 6, 7, 8]
+    plot_from_files(f"{os.path.dirname(__file__)}/results/ga", enemies)
 
