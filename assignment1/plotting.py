@@ -1,11 +1,13 @@
 import json
 import os
 import csv
-from typing import List
+from typing import List, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from scipy.stats import mannwhitneyu, ttest_ind
 
 font = {'family' : 'normal',
         'size'   : 12}
@@ -81,7 +83,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     plt.fill_between(gens, average - std_average, average + std_average, color="lightsteelblue")
     plt.fill_between(gens, maximum - std_max, maximum + std_max, color="lightsteelblue")
     plt.legend()
-    print(f"Line plotting results of {experiment_name}")
+    #print(f"Line plotting results of {experiment_name}")
     plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_line_plot.png", format="png")
     plt.clf()
     # average_fitnesses = np.mean(data, axis=1)
@@ -94,7 +96,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     # plt.fill_between(generations, average_fitnesses - std_fit, average_fitnesses + std_fit, color="lightsteelblue")
 
 
-def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
+def box_plot(enemy: int, best_fitnesses, algorithm: Tuple=["GA", "NEAT"], images_folder: str="images"):
     """
     Each element is the mean value of 5 testing with best network from run N
     [ mean_value_run 1, mean_value_run 2, ..]
@@ -103,21 +105,27 @@ def box_plot(experiment_name: str, best_fitnesses, images_folder: str="images"):
     :param images_folder:
     :return:
     """
+    minimums = []
+    for fitness in best_fitnesses:
+        minimums.append(min(fitness))
     if not os.path.exists(f"{local_dir}/{images_folder}/"):
         os.mkdir(f"{local_dir}/{images_folder}/")
-    data = np.array(best_fitnesses)
     plt.figure()
-    plt.title(f"{experiment_name.replace('_', ' ')}")
-    plt.boxplot(data)
+    axes = plt.axes()
+    plt.title(f"Enemy {enemy}")
+    plt.boxplot(best_fitnesses, positions = [1, 2], widths = 0.6)
     plt.ylabel("Individual Fitness")
-    plt.xlabel(experiment_name)
-    print(f"Box plotting results of {experiment_name}")
-    plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_box_plot.png", format="png")
+    plt.xlabel("Algorithm")
+    axes.set_xticklabels(algorithm)
+    axes.set_xticks([1, 2])
+    plt.ylim(min(minimums)-1,100)
+    #print(f"Box plotting results of Enemy {enemy}")
+    plt.savefig(f"{local_dir}/{images_folder}/{enemy}_box_plot.png", format="png")
     plt.clf()
 
 
 def plot_from_files(folder: str, enemies):
-    files = os.listdir(folder)
+    files = os.listdir(f"{folder}/ga")
     for enemy in enemies:
         enemy_files = [file for file in files if f"ga_solution_{enemy}" in file]
         lp_files = [file for file in enemy_files if "lpv" in file]
@@ -126,21 +134,39 @@ def plot_from_files(folder: str, enemies):
         box_plot_from_files(folder, bp_files, enemy)
         line_plot_from_files(folder, lp_files, enemy)
 
+
 def box_plot_from_files(folder, files, enemy):
-    return 0
+    values = []
+    for file in files:
+        with open(f"{folder}/ga/{file}") as csvfile:
+            reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
+            for row in reader:
+                if row != []:
+                    if len(values) == 0 or values[0] < row[0]:
+                        fitnesses = [float(value) for value in row[2][1:-2].split(", ")]
+                        values.append(sum(fitnesses) / len(fitnesses))
+
+    names = [2, 5, 8]
+    frame = pd.read_csv(f"{folder}/neat/boxplot.csv", names = names)
+    if enemy in names:
+        box_plot(enemy, [values, frame[enemy].tolist()[1:]])
+    else:
+        box_plot(enemy, [values, values], ["GA", "GA"])
+    #mannwhitneyu, ttest_ind
+    
 
 def line_plot_from_files(folder, files, enemy):
     values = []
     idx = 0
     for file in files:
         values.append([])
-        with open(f"{folder}/{file}") as csvfile:
+        with open(f"{folder}/ga/{file}") as csvfile:
             reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
             for row in reader:
                 if row != []:
                     values[idx].append(row)
         idx += 1
-    line_plot(f"ga_{enemy}", values)
+    line_plot(f"{enemy}", values)
 
 
 if __name__ == '__main__':
@@ -151,5 +177,5 @@ if __name__ == '__main__':
     # line_plot("", tot_test)
     # box_plot("", best_test)
     enemies = [1, 2, 3, 4, 5, 6, 7, 8]
-    plot_from_files(f"{os.path.dirname(__file__)}/results/ga", enemies)
+    plot_from_files(f"{os.path.dirname(__file__)}/results", enemies)
 
