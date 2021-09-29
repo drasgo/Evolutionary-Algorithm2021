@@ -131,7 +131,7 @@ dmypy.json
 .pyre/
 
 # Own
-assignment1/results
+assignment1/results/ga
 assignment1/debug
 assignment1/images
 ga_specialist_logs.txt

@@ -1,9 +1,10 @@
 import os
+from typing import List
 
 from assignment1.controllers.gann_controller import ga_controller as Controller
 
-def run(cycles: int):
-    for enemy in {1, 2, 3, 4, 5, 6, 7, 8}:
+def run(cycles: int, enemies: List[int]):
+    for enemy in enemies:
         for idx in range(cycles):
             Controller(150, 20, [enemy]).execute()
 
@@ -12,4 +13,4 @@ if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 if __name__ == '__main__':
-    run(10)
+    run(10, [2, 5, 8])

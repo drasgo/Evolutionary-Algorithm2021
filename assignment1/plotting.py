@@ -126,13 +126,17 @@ def box_plot(enemy: int, best_fitnesses, algorithm: Tuple=["GA", "NEAT"], images
 
 def plot_from_files(folder: str, enemies):
     files = os.listdir(f"{folder}/ga")
+    box_results = []
     for enemy in enemies:
         enemy_files = [file for file in files if f"ga_solution_{enemy}" in file]
         lp_files = [file for file in enemy_files if "lpv" in file]
         bp_files = [file for file in enemy_files if "bpv" in file]
 
-        box_plot_from_files(folder, bp_files, enemy)
+        test_results = box_plot_from_files(folder, bp_files, enemy)
+        if test_results != 0:
+            box_results.append(test_results)
         line_plot_from_files(folder, lp_files, enemy)
+    return box_results
 
 
 def box_plot_from_files(folder, files, enemy):
@@ -149,11 +153,14 @@ def box_plot_from_files(folder, files, enemy):
     names = [2, 5, 8]
     frame = pd.read_csv(f"{folder}/neat/boxplot.csv", names = names)
     if enemy in names:
-        box_plot(enemy, [values, frame[enemy].tolist()[1:]])
+        neat_values = frame[enemy].tolist()[1:]
+        box_plot(enemy, [values, neat_values])
+        ttest = ttest_ind(values, neat_values).pvalue
+        mannwhitney = mannwhitneyu(values, neat_values).pvalue
+        return [ttest, mannwhitney]
     else:
         box_plot(enemy, [values, values], ["GA", "GA"])
-    #mannwhitneyu, ttest_ind
-    
+        return
 
 def line_plot_from_files(folder, files, enemy):
     values = []
@@ -176,6 +183,6 @@ if __name__ == '__main__':
     # best_test = [0.4,2,2.5, 3.3]
     # line_plot("", tot_test)
     # box_plot("", best_test)
-    enemies = [1, 2, 3, 4, 5, 6, 7, 8]
-    plot_from_files(f"{os.path.dirname(__file__)}/results", enemies)
+    enemies = [2, 5, 8]
+    print(plot_from_files(f"{os.path.dirname(__file__)}/results", enemies))
 
