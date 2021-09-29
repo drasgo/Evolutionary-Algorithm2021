@@ -3,8 +3,8 @@ import os
 from assignment1.controllers.gann_controller import ga_controller as Controller
 
 def run(cycles: int):
-    for idx in range(cycles):
-        for enemy in {2, 4, 5}:
+    for enemy in {8, 1, 3, 6, 7}:
+        for idx in range(cycles):
             Controller(150, 20, [enemy]).execute()
 
 headless = True

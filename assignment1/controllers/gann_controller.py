@@ -27,7 +27,7 @@ def fitness_func(solution, sol_idx):
     controller.fitnesses.append(total_fitness)
 
     if total_fitness > controller.current_best[0]:
-        gains_of_best = [gains]
+        gains_of_best = [result]
         fitnesses_of_best = [fitnesses]
         for idx in range(4):
             gains = 0
@@ -37,10 +37,10 @@ def fitness_func(solution, sol_idx):
                 fitnesses += result[0]
                 gains += (result[1] - result[2])  
             gains = gains / len(controller.enemies)
-            gains_of_best.append(gains)
+            gains_of_best.append(result)
             fitnesses = fitnesses / len(controller.enemies)
             fitnesses_of_best.append(fitnesses)
-        controller.current_best = [total_fitness, solution, gains_of_best, fitnesses_of_best]
+        controller.current_best = [total_fitness, gains_of_best, fitnesses_of_best]
         
     return total_fitness
 
@@ -82,16 +82,16 @@ class ga_controller(Controller):
 
         self.algorithm = GA(
             num_generations = generations,
-            num_parents_mating = 2,
+            num_parents_mating = int(population / 10),
             initial_population = self.initial_population_vector.copy(),
             fitness_func = fitness_func,
             on_generation = callback_generation,
             parent_selection_type = "tournament",
-            keep_parents = (population / 10),
+            keep_parents = int(population / 10),
             K_tournament = population,
             crossover_type = "single_point",
-            crossover_probability = 0.8,
-            mutation_probability = 0.2,
+            crossover_probability = 0.4,
+            mutation_probability = 0.4,
             mutation_percent_genes = 0.1,
             allow_duplicate_genes = False)
 
