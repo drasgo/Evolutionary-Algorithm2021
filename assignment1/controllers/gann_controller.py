@@ -82,12 +82,12 @@ class ga_controller(Controller):
 
         self.algorithm = GA(
             num_generations = generations,
-            num_parents_mating = int(population / 10),
+            num_parents_mating = 2,
             initial_population = self.initial_population_vector.copy(),
             fitness_func = fitness_func,
             on_generation = callback_generation,
             parent_selection_type = "tournament",
-            keep_parents = int(population / 10),
+            keep_parents = 2,
             K_tournament = population,
             crossover_type = "single_point",
             crossover_probability = 0.4,

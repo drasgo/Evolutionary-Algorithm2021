@@ -3,7 +3,7 @@ import os
 from assignment1.controllers.gann_controller import ga_controller as Controller
 
 def run(cycles: int):
-    for enemy in {8, 1, 3, 6, 7}:
+    for enemy in {1, 2, 3, 4, 5, 6, 7, 8}:
         for idx in range(cycles):
             Controller(150, 20, [enemy]).execute()
 
