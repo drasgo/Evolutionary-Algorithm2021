@@ -2,3 +2,4 @@ pygame
 tmx
 numpy
 neat-python
+pygad
