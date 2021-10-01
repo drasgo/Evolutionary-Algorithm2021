@@ -78,7 +78,7 @@ class ga_controller(Controller):
             player_controller = self,
             enemymode = "static",
             speed = "fastest",
-            randomini = "yes")
+            randomini = "no")
 
         self.algorithm = GA(
             num_generations = generations,

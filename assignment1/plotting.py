@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.stats import mannwhitneyu, ttest_ind
+from scipy.stats import mannwhitneyu, ttest_ind, wilcoxon
 
 font = {'family' : 'normal',
         'size'   : 12}
@@ -75,7 +75,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     # open(f"{local_dir}/{images_folder}/{experiment_name}_average_mean_values.txt", "w").write(str(average))
 
     plt.figure()
-    plt.title(f"{experiment_name.replace('_', ' ')}")
+    plt.title(f"Enemy {experiment_name.replace('_', ' ')}")
     plt.xlabel("Generations")
     plt.ylabel("Fitness Value")
     plt.plot(gens, maximum, "k", color="red", label="Average of maximum fitness values")
@@ -84,6 +84,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     plt.fill_between(gens, maximum - std_max, maximum + std_max, color="lightsteelblue")
     plt.legend()
     #print(f"Line plotting results of {experiment_name}")
+    plt.tight_layout(True)
     plt.savefig(f"{local_dir}/{images_folder}/{experiment_name}_line_plot.png", format="png")
     plt.clf()
     # average_fitnesses = np.mean(data, axis=1)
@@ -118,6 +119,7 @@ def box_plot(enemy: int, best_fitnesses, algorithm: Tuple=["GA", "NEAT"], images
     plt.xlabel("Algorithm")
     axes.set_xticklabels(algorithm)
     axes.set_xticks([1, 2])
+    plt.tight_layout()
     plt.ylim(min(minimums)-1,100)
     #print(f"Box plotting results of Enemy {enemy}")
     plt.savefig(f"{local_dir}/{images_folder}/{enemy}_box_plot.png", format="png")
@@ -134,7 +136,7 @@ def plot_from_files(folder: str, enemies):
 
         test_results = box_plot_from_files(folder, bp_files, enemy)
         if test_results != 0:
-            box_results.append(test_results)
+            box_results.append([enemy, test_results])
         line_plot_from_files(folder, lp_files, enemy)
     return box_results
 
@@ -146,9 +148,8 @@ def box_plot_from_files(folder, files, enemy):
             reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
             for row in reader:
                 if row != []:
-                    if len(values) == 0 or values[0] < row[0]:
-                        fitnesses = [float(value) for value in row[2][1:-2].split(", ")]
-                        values.append(sum(fitnesses) / len(fitnesses))
+                    fitnesses = [float(value) for value in row[2][1:-2].split(", ")]
+                    values.append(sum(fitnesses) / len(fitnesses))
 
     names = [2, 5, 8]
     frame = pd.read_csv(f"{folder}/neat/boxplot.csv", names = names)
@@ -157,10 +158,12 @@ def box_plot_from_files(folder, files, enemy):
         box_plot(enemy, [values, neat_values])
         ttest = ttest_ind(values, neat_values).pvalue
         mannwhitney = mannwhitneyu(values, neat_values).pvalue
-        return [ttest, mannwhitney]
+        print(values, neat_values)
+        wilcoxonResult = wilcoxon(values, neat_values).pvalue
+        return [ttest, mannwhitney, wilcoxonResult]
     else:
         box_plot(enemy, [values, values], ["GA", "GA"])
-        return
+        return 0
 
 def line_plot_from_files(folder, files, enemy):
     values = []
