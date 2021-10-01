@@ -242,9 +242,9 @@ class New_Environment(Environment):
                 if self.time >= enemy.timeexpire:
                     return self.return_run()
 
-            # else:
-            #     if self.time >= self.timeexpire:
-            #         return self.return_run()
+            else:
+                if self.time >= self.timeexpire:
+                    return self.return_run()
 
     # returns results of the run
     def return_run(self):

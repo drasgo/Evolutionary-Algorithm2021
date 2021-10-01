@@ -9,7 +9,7 @@ from assignment1.environment import New_Environment
 from assignment1.plotting import line_plot, box_plot
 
 # For Pygame: True for not using visuals and thus making experiments faster
-headless = False
+headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -19,7 +19,7 @@ config = os.path.join(local_dir, "configs", "config-neat")
 
 TRAINED_AGENTS_FOLDER = "trained_neat_agents"
 name = "neat_specialist"
-enemies_numbers = [1, 2, 3, 4, 5, 6, 7, 8]
+enemies_numbers = [2, 5, 8]
 gens = 20
 number_of_different_runs = 10
 test = 5
@@ -55,6 +55,8 @@ def neat_test(controller, environment: New_Environment, enemy: int, run: int) ->
     Test the best network of the population, with the current environment
     :param controller:
     :param environment:
+    :param enemy:
+    :param run:
     :return:
     """
     best_genome = controller.stats.best_unique_genomes(1)[0]
@@ -103,7 +105,7 @@ def run():
             mean_max_fitness_values.append(run_mean_max_fitness)
             print(f"\nFinished run nr°.{run_idx} of {number_of_different_runs-1}\n")
 
-        box_plot(f"{name}_enemy#{enemy}", mean_best_networks)
+        box_plot(f"{name}_enemy#{enemy}", mean_best_networks, enemy)
         line_plot(f"{name}_enemy#{enemy}", mean_max_fitness_values)
         print(f"Finished enemy {enemy}")
 
@@ -130,5 +132,5 @@ def separate_test(file_name: str, enemy: int):
         print(f"Error {e}")
 
 if __name__ == '__main__':
-    run()
-    # separate_test("neat_genome_enemy2_run9", 2)
+    # run()
+    separate_test("neat_genome_enemy3_run1", 3)
