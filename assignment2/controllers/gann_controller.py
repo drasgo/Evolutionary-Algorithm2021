@@ -81,7 +81,7 @@ class ga_controller(Controller):
             enemymode = "static",
             speed = "fastest",
             randomini = "no",
-            multiplemode = "no")
+            multiplemode = "yes")
 
         self.algorithm = GA(
             num_generations = generations,

@@ -12,7 +12,7 @@ def optimize(runs: int = 5):
         print(f"Run {run}: {gp_minimize(single_run, [(0.0, 1.0), (0.0001, 1.0), (0.0, 1.0)])}")
 
 def single_run(inputs) -> float:
-    return Controller(50, 15, [5], inputs[0], inputs[1], inputs[2]).execute()
+    return Controller(50, 20, [5, 8], inputs[0], inputs[1], inputs[2]).execute()
 
 headless = True
 if headless:
