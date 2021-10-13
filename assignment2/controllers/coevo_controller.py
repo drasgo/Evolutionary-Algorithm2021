@@ -29,9 +29,6 @@ class player_controller(Controller):
         action[round(prediction[0])] = 1
         return action
 
-
-
-
 def sigmoid_activation(x):
 	return 1./(1.+np.exp(-x))
 
@@ -40,6 +37,9 @@ class player_controller_demo(Controller):
 	def __init__(self, _n_hidden):
 		# Number of hidden neurons
 		self.n_hidden = [_n_hidden]
+
+	# def vector_to_network():
+	# 	pass
 
 	def control(self, inputs, controller):
 		# Normalises the input using min-max scaling
