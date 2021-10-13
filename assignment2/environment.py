@@ -73,9 +73,19 @@ class New_Environment(Environment):
         old_min = -29801
         new_max = 100
         new_min = 0
+<<<<<<< HEAD
         fitness_value = (100 - self.get_enemylife()) - (100 - self.get_playerlife()) ** 2 - (np.sum(100 - np.array(self.player_life_timeseries)) / self.get_time()) ** 1.5 - self.get_time() ** 1.15
         rescaled_value = (new_max - new_min) / (old_max - old_min) * (fitness_value - old_max) + new_max
         return rescaled_value
+=======
+        fitness_value = (100 - self.get_enemylife()) - (100 - self.get_playerlife()) ** 2 - (np.sum(100 - np.array(self.player_life_timeseries)) / self.get_time()) ** 1.5 - self.get_time ** 1.15
+        rescaled_value = (new_max - new_min) / (old_max - old_min) * (fitness_value - old_max) + new_max
+        return rescaled_value
+        # if self.get_playerlife() == self.get_enemylife(): #The two characters can trade kill, which leads to zero division error
+        #     return -(self.get_time()**0.5)
+        # else:
+        #     return (self.get_playerlife() / (self.get_playerlife() + self.get_enemylife())) * 100 - self.get_time()**0.5
+>>>>>>> 7582ebc398239d4f16b356df298d6133256b4e3e
 
     def set_graphics(self, graphics: bool):
         self.graphics = graphics
