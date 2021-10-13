@@ -47,14 +47,14 @@ def fitness_func(solution, sol_idx):
 
 def callback_generation(ga_instance):
     controller.current_generation += 1
-    controller.plotting_fitnesses.append([sum(controller.fitnesses) / len(controller.fitnesses), max(controller.fitnesses)])
+    controller.plotting_fitnesses.append(sum(controller.fitnesses) / len(controller.fitnesses))
     controller.fitnesses.clear()
     population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
     controller.networks.update_population_trained_weights(population_matrice)
 
 
 class ga_controller(Controller):
-    def __init__(self, population: int, generations: int, enemies: list):
+    def __init__(self, population: int, generations: int, enemies: list, mutation_rate: float, mutation_amount: float, crossover_rate: float):
         self.networks = gann.GANN(
             num_solutions = population,
             num_neurons_input = 20,
@@ -62,6 +62,8 @@ class ga_controller(Controller):
             num_neurons_output = 5,
             output_activation = "sigmoid",
             hidden_activations = "sigmoid")
+
+        print(f"mut_rate: {mutation_rate}, mut_amount: {mutation_amount}, cross_rate: {crossover_rate}")
 
         self.networks.create_population()
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
@@ -78,7 +80,8 @@ class ga_controller(Controller):
             player_controller = self,
             enemymode = "static",
             speed = "fastest",
-            randomini = "no")
+            randomini = "no",
+            multiplemode = "no")
 
         self.algorithm = GA(
             num_generations = generations,
@@ -90,9 +93,9 @@ class ga_controller(Controller):
             keep_parents = 2,
             K_tournament = population,
             crossover_type = "single_point",
-            crossover_probability = 0.4,
-            mutation_probability = 0.4,
-            mutation_percent_genes = 0.1,
+            crossover_probability = crossover_rate,
+            mutation_probability = mutation_rate,
+            mutation_percent_genes = mutation_amount,
             allow_duplicate_genes = False)
 
         global controller
@@ -108,23 +111,26 @@ class ga_controller(Controller):
     def execute(self):
         self.algorithm.run()
 
-        parent_dir = os.path.dirname(os.path.dirname(__file__))
-        if not os.path.exists(f"{parent_dir}/results/"):
-            os.mkdir(f"{parent_dir}/results/")
-        target_dir = f"{parent_dir}/results/ga"
-        if not os.path.exists(target_dir):
-            os.mkdir(target_dir)
+        # parent_dir = os.path.dirname(os.path.dirname(__file__))
+        # if not os.path.exists(f"{parent_dir}/results/"):
+        #     os.mkdir(f"{parent_dir}/results/")
+        # target_dir = f"{parent_dir}/results/ga"
+        # if not os.path.exists(target_dir):
+        #     os.mkdir(target_dir)
         
-        enemy_string = f""
-        for enemy in self.enemies:
-            enemy_string += f"{enemy}_"
+        # enemy_string = f""
+        # for enemy in self.enemies:
+        #     enemy_string += f"{enemy}_"
 
-        timestamp = datetime.now().strftime("%y%m%d%H%M%S")
+        # timestamp = datetime.now().strftime("%y%m%d%H%M%S")
         
-        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_lpv.csv", "w") as lpv_file:
-            writer_l = csv.writer(lpv_file)
-            writer_l.writerows(self.plotting_fitnesses)
+        # with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_lpv.csv", "w") as lpv_file:
+        #     writer_l = csv.writer(lpv_file)
+        #     writer_l.writerows(self.plotting_fitnesses)
 
-        with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_bpv.csv", "w") as bpv_file:
-            writer_b = csv.writer(bpv_file)
-            writer_b.writerows([self.current_best])
+        # with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_bpv.csv", "w") as bpv_file:
+        #     writer_b = csv.writer(bpv_file)
+        #     writer_b.writerows([self.current_best])
+
+        print(self.plotting_fitnesses[len(self.plotting_fitnesses)-1])
+        return 100 - self.plotting_fitnesses[len(self.plotting_fitnesses)-1]
