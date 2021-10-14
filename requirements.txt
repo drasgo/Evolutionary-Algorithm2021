@@ -3,3 +3,5 @@ tmx
 numpy
 neat-python
 pygad
+deap
+skopt
