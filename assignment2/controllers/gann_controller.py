@@ -132,5 +132,5 @@ class ga_controller(Controller):
         #     writer_b = csv.writer(bpv_file)
         #     writer_b.writerows([self.current_best])
 
-        print(self.plotting_fitnesses[len(self.plotting_fitnesses)-1])
-        return 100 - self.plotting_fitnesses[len(self.plotting_fitnesses)-1]
+        print(self.plotting_fitnesses[0], self.plotting_fitnesses[len(self.plotting_fitnesses)-1])
+        return 100 - (self.plotting_fitnesses[len(self.plotting_fitnesses)-1] - self.plotting_fitnesses[0])
