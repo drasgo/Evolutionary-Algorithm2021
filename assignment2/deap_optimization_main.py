@@ -22,7 +22,7 @@ config = {
 }
 
 def optimize():
-    save_path = 'assignment2/experiments/deap/'
+    save_path = 'assignment2/experiments/deap/results'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
@@ -33,7 +33,7 @@ def optimize():
     start_values = [0.2, 0.2, 0.5,0.2]
     result = gp_minimize(single_run, [mutpb, indpb, cxpb, sigma], n_calls=11, x0=start_values, random_state=10)
     print(f"Result {result}")
-    dump(result, save_path + 'optimization_result.plk')
+    dump(result, save_path + '/optimization_result.plk')
     config['mutpb'] = result.x[0]
     config['indpb'] = result.x[1]
     config['cxpb'] = result.x[2]
@@ -41,7 +41,7 @@ def optimize():
     config['optimize'] = False
     config['obtained_fitness'] = result.fun
 
-    with open(save_path + 'optimization_result.json', 'w') as fp:
+    with open(save_path + '/optimization_result.json', 'w') as fp:
         json.dump(config, fp)
 
 def single_run(inputs) -> float:

@@ -4,7 +4,6 @@ import numpy as np
 from deap import base, creator, tools, algorithms, cma
 import os, sys
 import array
-import pickle
 
 p = os.path.abspath('.')
 sys.path.insert(1, p)
