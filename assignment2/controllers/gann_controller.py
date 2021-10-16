@@ -8,53 +8,44 @@ from pygad import GA
 from datetime import datetime
 
 from evoman.controller import Controller
-from assignment1.environment import New_Environment as Environment
+from assignment2.environment import New_Environment as Environment
 
 
 def fitness_func(solution, sol_idx):
-    fitnesses = 0
-    gains = 0
+    fitnesses = []
+    gains = []
     controller.current_solution = sol_idx
 
     for enemy in controller.enemies:
-        result = controller.environment.run_single(enemy, controller, "None")
-        fitnesses += result[0]
-        gains += (result[1] - result[2])
+        fitness, playerlife, enemylife, time = controller.environment.run_single(enemy, controller, "None")
+        fitnesses.append(fitness)
+        gains.append(playerlife - enemylife)
 
-    gains = gains / len(controller.enemies)
-
-    total_fitness = fitnesses / len(controller.enemies)
+    total_fitness = sum(fitnesses) / len(controller.enemies)
     controller.fitnesses.append(total_fitness)
 
-    if total_fitness > controller.current_best[0]:
-        gains_of_best = [result]
-        fitnesses_of_best = [fitnesses]
-        for idx in range(4):
-            gains = 0
-            fitnesses = 0
-            for enemy in controller.enemies:
-                result = controller.environment.run_single(enemy, controller, "None")
-                fitnesses += result[0]
-                gains += (result[1] - result[2])  
-            gains = gains / len(controller.enemies)
-            gains_of_best.append(result)
-            fitnesses = fitnesses / len(controller.enemies)
-            fitnesses_of_best.append(fitnesses)
-        controller.current_best = [total_fitness, gains_of_best, fitnesses_of_best]
+    if total_fitness > controller.current_best_solution[0]:
+        gains_of_best = []
+        for enemy in [1, 2, 3, 4, 5, 6, 7, 8]:
+            for idx in range(5):
+                gains.clear()
+                fitness, playerlife, enemylife, time = controller.environment_final.run_single(enemy, controller, "None")
+                gains.append(playerlife - enemylife)
+            gains_of_best.append(sum(gains) / 5)
+        controller.current_best_solution = [total_fitness, gains_of_best, solution]
         
     return total_fitness
 
 
 def callback_generation(ga_instance):
-    controller.current_generation += 1
-    controller.plotting_fitnesses.append(sum(controller.fitnesses) / len(controller.fitnesses))
+    controller.plotting_fitnesses.append([sum(controller.fitnesses) / len(controller.fitnesses), max(controller.fitnesses)])
     controller.fitnesses.clear()
     population_matrice = gann.population_as_matrices(controller.networks.population_networks, ga_instance.population)
     controller.networks.update_population_trained_weights(population_matrice)
 
 
 class ga_controller(Controller):
-    def __init__(self, population: int, generations: int, enemies: list, mutation_rate: float, mutation_amount: float, crossover_rate: float):
+    def __init__(self, population: int, generations: int, enemies: list, iteration: int, mutation_rate: float, mutation_amount: float, crossover_rate: float):
         self.networks = gann.GANN(
             num_solutions = population,
             num_neurons_input = 20,
@@ -63,19 +54,27 @@ class ga_controller(Controller):
             output_activation = "sigmoid",
             hidden_activations = "sigmoid")
 
-        print(f"mut_rate: {mutation_rate}, mut_amount: {mutation_amount}, cross_rate: {crossover_rate}")
-
         self.networks.create_population()
         self.initial_population_vector = gann.population_as_vectors(self.networks.population_networks)
         self.enemies = enemies
-        self.current_generation = 0
         self.fitnesses = []
-        self.current_best = [0, []]
+        self.current_best_solution = [0, [], []]
         self.plotting_fitnesses = []
+        self.iteration = iteration
 
         self.environment = Environment(
             experiment_name = "ga_specialist",
             enemies = enemies,
+            playermode = "ai",
+            player_controller = self,
+            enemymode = "static",
+            speed = "fastest",
+            randomini = "no",
+            multiplemode = "yes")
+
+        self.environment_final = Environment(
+            experiment_name = "ga_specialist_final",
+            enemies = [1, 2, 3, 4, 5, 6, 7, 8],
             playermode = "ai",
             player_controller = self,
             enemymode = "static",
@@ -111,26 +110,24 @@ class ga_controller(Controller):
     def execute(self):
         self.algorithm.run()
 
-        # parent_dir = os.path.dirname(os.path.dirname(__file__))
-        # if not os.path.exists(f"{parent_dir}/results/"):
-        #     os.mkdir(f"{parent_dir}/results/")
-        # target_dir = f"{parent_dir}/results/ga"
-        # if not os.path.exists(target_dir):
-        #     os.mkdir(target_dir)
+        parent_dir = os.path.dirname(os.path.dirname(__file__))
+        if not os.path.exists(f"{parent_dir}/results/"):
+            os.mkdir(f"{parent_dir}/results/")
+        target_dir = f"{parent_dir}/results/ga"
+        if not os.path.exists(target_dir):
+            os.mkdir(target_dir)
         
-        # enemy_string = f""
-        # for enemy in self.enemies:
-        #     enemy_string += f"{enemy}_"
-
-        # timestamp = datetime.now().strftime("%y%m%d%H%M%S")
+        enemy_string = f""
+        for enemy in self.enemies:
+            enemy_string += f"{enemy}_"
         
-        # with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_lpv.csv", "w") as lpv_file:
-        #     writer_l = csv.writer(lpv_file)
-        #     writer_l.writerows(self.plotting_fitnesses)
+        with open(f"{target_dir}/ga_solution_{enemy_string}{self.iteration}_lpv.csv", "w") as lpv_file:
+            writer_l = csv.writer(lpv_file)
+            writer_l.writerows(self.plotting_fitnesses)
 
-        # with open(f"{target_dir}/ga_solution_{enemy_string}{timestamp}_bpv.csv", "w") as bpv_file:
-        #     writer_b = csv.writer(bpv_file)
-        #     writer_b.writerows([self.current_best])
+        with open(f"{target_dir}/ga_solution_{enemy_string}{self.iteration}_bpv.csv", "w") as bpv_file:
+            writer_b = csv.writer(bpv_file)
+            writer_b.writerows(self.current_best_solution)
 
-        print(self.plotting_fitnesses[0], self.plotting_fitnesses[len(self.plotting_fitnesses)-1])
+        print(self.current_best_solution)
         return 100 - (self.plotting_fitnesses[len(self.plotting_fitnesses)-1] - self.plotting_fitnesses[0])
