@@ -120,11 +120,11 @@ def run_deap(env, **config):
     MAX_STRATEGY = 0.5
     toolbox.register("individual", generateES, creator.Individual, creator.Strategy, ind_size, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    toolbox.register('mate', tools.cxOnePoint)
-    # toolbox.register("mate", tools.cxESBlend, alpha=0.1)
-    # toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
+    # toolbox.register('mate', tools.cxOnePoint)
+    toolbox.register("mate", tools.cxESBlend, alpha=0.1)
+    toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
     toolbox.register("mutate", tools.mutGaussian, mu=mu, sigma=sigma, indpb=indpb)
-    # toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
+    toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
     toolbox.register("select", tools.selTournament, tournsize=tournsize)
     toolbox.register("evaluate", evaluate, env=env)
 
@@ -166,8 +166,6 @@ def run_deap(env, **config):
 def main(**config):
     experiment_name = config.get('name', 'test')
     enemies = config.get('enemies', [5,8])
-    random.seed(10)
-    np.random.seed(10)
     env = create_environment(experiment_name, enemies)
     return run_deap(env, **config)
 

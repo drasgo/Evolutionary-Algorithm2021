@@ -4,19 +4,22 @@ import numpy as np
 import json
 import pickle
 
-from plotting import line_plot
+from plotting import line_plot, box_plot
 from deap_main import main
 
 from environment import New_Environment as Environment
 from controllers.deap_controller import player_controller_demo
 
-def evolve_agents(n=2):
-    base_path = 'assignment2/experiments/deap/'
+def evolve_agents(base_path, n=10):
 
     # Open the environment configuration
-    config_file = base_path + 'results/' + 'optimization_result.json'
+    config_file = base_path + 'results/optimization_result.json'
     with open(config_file) as f:
         config = json.load(f)
+
+    config['n_pop'] = 10 #50
+    config['n_gens_ga'] = 2 #80
+    config['n_gens_cma'] = 1 #20
 
     # Check folder for controllers
     controller_path = base_path + 'controllers/'
@@ -33,23 +36,20 @@ def evolve_agents(n=2):
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
-    config['n_pop'] = 12
-    config['n_gens_ga'] = 3
-    config['n_gens_cma'] = 2
-
-    agent_sets = [[5,8], [1,2]]
-    # agent_sets = [[5,8]]
+    # Run the algorithm for both sets of agents
+    agent_sets = [[6,8], [1,2,3,5]] 
     for i, enemies in enumerate(agent_sets):
         config['enemies'] = enemies
 
         # Check folder for controllers
-        save_path = controller_path + 'group' + str(i) + '/'
+        save_path = controller_path + 'group_' + str(i) + '/'
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
         stats_per_run = []
         for j in range(n):
-            experiment_name = '_run_' + str(j)
+            print(f'Running: group: {enemies} run:{j}')
+            experiment_name = 'run_' + str(j)
             config['name'] = experiment_name
             stats, best_ind = main(**config)
             stats_per_run.append(stats)
@@ -58,10 +58,12 @@ def evolve_agents(n=2):
         with open(result_path + 'group_' + str(i) + '_evolution_result.pkl', "wb") as cp_file:
             pickle.dump(stats_per_run, cp_file)
 
-        # pickle.dump(stats_per_run, base_path + 'evolution_result.pkl')
         line_plot('group_' + str(i), stats_per_run, image_path)
 
 def run_single_enemy(enemy, controller):
+    '''
+        A single controller fights a single enemy
+    '''
     environment = Environment(
         experiment_name='test',
         multiplemode="no",  # yes or no
@@ -77,33 +79,91 @@ def run_single_enemy(enemy, controller):
     f,p,e,t = environment.play(pcont=np.asarray(controller))
     return [f,p,e,t]
 
-def run_best():
+def run_best(base_path):
+    '''
+        Test the controller performances, all 10 controllers fight each enemy 5 times. 
+        It saves a 4D-matrix: 2 (n_groups) x 10 (controllers) x 8 enemies x 4 (average stats over 5 runs: fitness, player energy, enemy energy, time)
+    '''
     enemies = [1,2,3,4,5,6,7,8]
-    base_path = 'assignment2/experiments/deap/controllers/'
-    groups = os.listdir(base_path)
-    for group in groups:
-        controllers_performance = []
-        group_path = base_path + group
-        controllers = os.listdir(group_path)
-        for controller in controllers:
-            controller_path = group_path + '/' + controller
-            controller = np.loadtxt(controller_path)
-            enemy_scores = []
-            for enemy in enemies:
-                fitness = []
-                for i in range(5):
-                    _, p, e, _ = run_single_enemy(enemy, controller)
-                    fitness.append(p-e)
-                enemy_scores.append(np.mean(fitness))
-            controllers_performance.append(np.mean(enemy_scores))
-        
-        with open('assignment2/experiments/deap/results/' + group + '_performance_result.pkl', "wb") as cp_file:
-            pickle.dump(controllers_performance, cp_file)
-  
+    groups = ['group_0/', 'group_1/']
+    controller_path = base_path + 'controllers/'
+    results = np.empty([len(groups), 10, len(enemies), 4])
+    for i, group in enumerate(groups):
+        controllers = os.listdir(controller_path + group)
+        for j, controller in enumerate(controllers):
+            print(f'currently processing group {group} controller {j}')
+            controller = np.loadtxt(controller_path + group + controller)
+            for k, enemy in enumerate(enemies):
+                results_single = np.empty((5, 4))
+                for n in range(5):
+                    f,p,e,t = run_single_enemy(enemy, controller)
+                    results_single[n] = np.asarray([f,p,e,t])          
+                results[i, j, k] = np.mean(results_single, axis=0)
+
+    with open(base_path + 'results/performance_result.pkl', "wb") as cp_file:
+        pickle.dump(results, cp_file)
+
+def collect_datapoints(data):
+    '''
+        Extracts the 10 datapoints from the 4D-matrix for the boxplots.
+    '''
+    both_datapoints = []
+    for group in range(2):
+        datapoints = []
+        for controller in range(10):
+            gain = 0
+            for enemy in range(8):
+                gain += data[group, controller, enemy, 1] - data[group, controller, enemy, 2]
+            datapoints.append(gain)
+        both_datapoints.append(datapoints)
+    return both_datapoints
+
+def collect_champion(data_1, data_2):
+    max_f = -np.inf
+    best_stats = None
+    best_description = None
+    for i, file in enumerate([data_1, data_2]):
+        for group in range(2):
+            for controller in range(10):
+                t = np.mean(file[group, controller, :, 0])
+                if t > max_f:
+                    max_f = t
+                    best_stats = file[group, controller, :]
+                    best_description = f'algorithm {i} group {group} controller {controller}'
+    summary = np.mean(best_stats, axis=0)
+    best_stats = np.vstack((best_stats, summary))                
+    np.savetxt('assignment2/experiments/champion_table.csv', best_stats, delimiter=",", 
+                header='Fitness, Player energy, Enemy energy, Time', fmt='%f')
+    print('The overall best controller is: ', best_description)
+
+
+def performance_to_boxplot(file_1, file_2):
+    '''
+        file_1: the file that belongs to the GA experiments
+        file_2: the file that belongs to the GA-CMA-ES experiments
+    '''
+    # Read the performance file of GA
+    with open(file_1, 'rb') as f:
+        data_1 = pickle.load(f)
+    # Read the performance file of GA-CMA-ES
+    with open(file_2, 'rb') as f:
+        data_2 = pickle.load(f)
+
+    collect_champion(data_1, data_2)
+
+    # Collect datapoints
+    file_1_group_1_datapoints, file_1_group_2_datapoints = collect_datapoints(data_1)
+    file_2_group_1_datapoints, file_2_group_2_datapoints = collect_datapoints(data_2)
+    
+    # Create boxplots
+    box_plot([6,8], [file_1_group_1_datapoints, file_2_group_1_datapoints], ("GA", "GA-CMS"), 'experiments')
+    box_plot([1,2,3,5], [file_1_group_2_datapoints, file_2_group_2_datapoints], ("GA", "GA-CMS"), 'experiments')
 
 if __name__ == '__main__':
     headless = True
     if headless:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
-    evolve_agents()
-    run_best()
+    path_deap = 'assignment2/experiments/deap/'
+    # evolve_agents(path_deap)
+    # run_best(path_deap)
+    performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
