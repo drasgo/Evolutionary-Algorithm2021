@@ -14,10 +14,10 @@ from deap_main import main
 config = {
     'name': 'optimization',
     'optimize': True,
-    "n_pop": 10,
-    "n_gens_ga": 2,
-    "n_gens_cma": 1, 
-    'enemies': [1,2],
+    "n_pop": 50,
+    "n_gens_ga": 30,
+    "n_gens_cma": 10, 
+    'enemies': [1,2,3],
     'tournsize': 3
 }
 
@@ -31,7 +31,7 @@ def optimize():
     cxpb = (0.2, 0.9) #The probability of mating two individuals.
     sigma = (0.01, 0.6) #The standard deviation for Gaussian operations
     start_values = [0.2, 0.2, 0.5,0.2]
-    result = gp_minimize(single_run, [mutpb, indpb, cxpb, sigma], n_calls=11, x0=start_values, random_state=10)
+    result = gp_minimize(single_run, [mutpb, indpb, cxpb, sigma], n_calls=20 , x0=start_values, random_state=10, verbose=True)
     print(f"Result {result}")
     dump(result, save_path + '/optimization_result.plk')
     config['mutpb'] = result.x[0]

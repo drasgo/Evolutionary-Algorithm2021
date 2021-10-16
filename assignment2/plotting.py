@@ -97,7 +97,7 @@ def line_plot(experiment_name: str, total_fitnesses: List[List[List[float]]], im
     # plt.fill_between(generations, average_fitnesses - std_fit, average_fitnesses + std_fit, color="lightsteelblue")
 
 
-def box_plot(enemy: int, best_fitnesses, algorithm: Tuple=["GA", "NEAT"], images_folder: str="images"):
+def box_plot(enemy: list, best_fitnesses, algorithm: Tuple=["GA", "GA-CMS"], images_folder: str="images"):
     """
     Each element is the mean value of 5 testing with best network from run N
     [ mean_value_run 1, mean_value_run 2, ..]
@@ -113,9 +113,9 @@ def box_plot(enemy: int, best_fitnesses, algorithm: Tuple=["GA", "NEAT"], images
         os.mkdir(f"{local_dir}/{images_folder}/")
     plt.figure()
     axes = plt.axes()
-    plt.title(f"Enemy {enemy}")
+    plt.title(f"Enemies {enemy}")
     plt.boxplot(best_fitnesses, positions = [1, 2], widths = 0.6)
-    plt.ylabel("Individual Fitness")
+    plt.ylabel("Gain")
     plt.xlabel("Algorithm")
     axes.set_xticklabels(algorithm)
     axes.set_xticks([1, 2])

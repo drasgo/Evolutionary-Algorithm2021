@@ -1,0 +1,1 @@
+{"name": "optimization", "optimize": false, "n_pop": 50, "n_gens_ga": 30, "n_gens_cma": 10, "enemies": [1, 2, 3], "tournsize": 3, "mutpb": 0.5, "indpb": 0.7880974448418656, "cxpb": 0.2, "sigma": 0.01, "obtained_fitness": -68.77083765914148}
