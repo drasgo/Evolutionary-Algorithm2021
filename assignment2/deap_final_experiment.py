@@ -17,9 +17,9 @@ def evolve_agents(base_path, n=10):
     with open(config_file) as f:
         config = json.load(f)
 
-    config['n_pop'] = 150 #50
-    config['n_gens_ga'] = 50 #80
-    config['n_gens_cma'] = 0 #20
+    config['n_pop'] = 50 #50
+    config['n_gens_ga'] = 40 #80
+    config['n_gens_cma'] = 10 #20
 
     # Check folder for controllers
     controller_path = base_path + 'controllers/'
@@ -37,7 +37,7 @@ def evolve_agents(base_path, n=10):
         os.makedirs(result_path)
 
     # Run the algorithm for both sets of agents
-    agent_sets = [[5,8], [2,3,5,8]] 
+    agent_sets = [[6,8], [1,2,3,5]] 
     # agent_sets = [[6,8]]
     for i, enemies in enumerate(agent_sets):
         config['enemies'] = enemies
@@ -58,8 +58,6 @@ def evolve_agents(base_path, n=10):
 
         with open(result_path + 'group_' + str(i) + '_evolution_result.pkl', "wb") as cp_file:
             pickle.dump(stats_per_run, cp_file)
-
-        line_plot('group_' + str(i), stats_per_run, image_path)
 
 def run_single_enemy(enemy, controller):
     '''
@@ -137,6 +135,15 @@ def collect_champion(data_1, data_2):
                 header='Fitness, Player energy, Enemy energy, Time', fmt='%f')
     print('The overall best controller is: ', best_description)
 
+def rename_lineplot(path):
+    path_deap = 'assignment2/experiments/deap/'
+    agent_sets = ['[6,8]', '[1,2,3,5]'] 
+    for i, group in enumerate(['group_0', 'group_1']):
+        file = path_deap + 'results/' + group + '_evolution_result.pkl'
+        with open(file, 'rb') as f:
+            data = pickle.load(f)
+        line_plot('group ' +  str(agent_sets[i]), data, 'experiments/deap/images/')
+    
 
 def performance_to_boxplot(file_1, file_2):
     '''
@@ -166,6 +173,7 @@ if __name__ == '__main__':
         os.environ["SDL_VIDEODRIVER"] = "dummy"
     path_ga = 'assignment2/experiments/ga/'
     path_deap = 'assignment2/experiments/deap/'
-    evolve_agents(path_ga)
+    rename_lineplot(path_deap)
+    # evolve_agents(path_ga)
     # run_best(path_deap)
     # performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
