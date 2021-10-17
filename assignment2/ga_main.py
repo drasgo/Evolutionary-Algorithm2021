@@ -6,7 +6,7 @@ from assignment2.controllers.gann_controller import ga_controller as Controller
 def run(cycles: int, enemies: List[List[int]]):
     for enemy_list in enemies:
         for idx in range(cycles):
-            Controller(150, 20, enemy_list, idx, 0.01, 0.2, 0.8).execute()
+            Controller(50, 50, enemy_list, idx, 0.01, 0.2, 0.8).execute()
 
 headless = True
 if headless:

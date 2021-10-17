@@ -9,6 +9,7 @@ from datetime import datetime
 
 from evoman.controller import Controller
 from assignment2.environment import New_Environment as Environment
+from controllers.deap_controller import player_controller_demo as Demo_Controller
 
 
 def fitness_func(solution, sol_idx):
@@ -102,14 +103,28 @@ class ga_controller(Controller):
 
     def control(self, inputs: np.ndarray, controller=None):
         # nn.predict() returns an array with an integer for each input which represents the activated output neuron
-        prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs]))
-        action = [0, 0, 0, 0, 0]
-        action[round(prediction[0])] = 1
-        return action
+        control = gann.population_as_matrices(self.networks.population_networks, self.algorithm.population)
+        #print(control[self.current_solution])
+        values = []
+        for layer in control[self.current_solution]:
+            for idx in range(len(layer[0])):
+                values.append(0)
+            for neuron in layer:
+                for weight in neuron:
+                    values.append(weight)
+        #print(values)
+        #print(len(values))
+        return Demo_Controller(10).control(inputs, np.array(values))
+        # prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs]))
+        # action = [0, 0, 0, 0, 0]
+        # action[round(prediction[0])] = 1
+        # return action
 
     def execute(self):
+        # run EA
         self.algorithm.run()
 
+        # prepare output folders
         parent_dir = os.path.dirname(os.path.dirname(__file__))
         if not os.path.exists(f"{parent_dir}/results/"):
             os.mkdir(f"{parent_dir}/results/")
@@ -117,17 +132,20 @@ class ga_controller(Controller):
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         
+        # prepare file name
         enemy_string = f""
         for enemy in self.enemies:
             enemy_string += f"{enemy}_"
         
+        # prepare values for line plot
         with open(f"{target_dir}/ga_solution_{enemy_string}{self.iteration}_lpv.csv", "w") as lpv_file:
             writer_l = csv.writer(lpv_file)
             writer_l.writerows(self.plotting_fitnesses)
 
+        # prepare values for box plot
         with open(f"{target_dir}/ga_solution_{enemy_string}{self.iteration}_bpv.csv", "w") as bpv_file:
             writer_b = csv.writer(bpv_file)
             writer_b.writerows(self.current_best_solution)
 
-        print(self.current_best_solution)
-        return 100 - (self.plotting_fitnesses[len(self.plotting_fitnesses)-1] - self.plotting_fitnesses[0])
+        #print(self.current_best_solution)
+        #return 100 - (self.plotting_fitnesses[len(self.plotting_fitnesses)-1] - self.plotting_fitnesses[0])

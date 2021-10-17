@@ -129,15 +129,18 @@ def box_plot(enemy: list, best_fitnesses, algorithm: Tuple=["GA", "GA-CMS"], ima
 def plot_from_files(folder: str, enemies):
     files = os.listdir(f"{folder}/ga")
     box_results = []
-    for enemy in enemies:
-        enemy_files = [file for file in files if f"ga_solution_{enemy}" in file]
+    for enemy_list in enemies:
+        enemy_string = f""
+        for enemy in enemy_list:
+            enemy_string += f"{enemy}_"
+        enemy_files = [file for file in files if f"ga_solution_{enemy_string}" in file]
         lp_files = [file for file in enemy_files if "lpv" in file]
         bp_files = [file for file in enemy_files if "bpv" in file]
 
-        test_results = box_plot_from_files(folder, bp_files, enemy)
-        if test_results != 0:
-            box_results.append([enemy, test_results])
-        line_plot_from_files(folder, lp_files, enemy)
+        #test_results = box_plot_from_files(folder, bp_files, enemy)
+        #if test_results != 0:
+        #    box_results.append([enemy, test_results])
+        line_plot_from_files(folder, lp_files, enemy_string)
     return box_results
 
 
@@ -158,7 +161,7 @@ def box_plot_from_files(folder, files, enemy):
         box_plot(enemy, [values, neat_values])
         ttest = ttest_ind(values, neat_values).pvalue
         mannwhitney = mannwhitneyu(values, neat_values).pvalue
-        print(values, neat_values)
+        #print(values, neat_values)
         wilcoxonResult = wilcoxon(values, neat_values).pvalue
         return [ttest, mannwhitney, wilcoxonResult]
     else:
@@ -186,6 +189,6 @@ if __name__ == '__main__':
     # best_test = [0.4,2,2.5, 3.3]
     # line_plot("", tot_test)
     # box_plot("", best_test)
-    enemies = [2, 5, 8]
+    enemies = [[1, 2, 3, 5], [6, 8]]
     print(plot_from_files(f"{os.path.dirname(__file__)}/results", enemies))
 
