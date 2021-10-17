@@ -10,7 +10,7 @@ from deap_main import main
 from environment import New_Environment as Environment
 from controllers.deap_controller import player_controller_demo
 
-def evolve_agents(base_path, n=4):
+def evolve_agents(base_path, n=10):
 
     # Open the environment configuration
     config_file = base_path + 'results/optimization_result.json'
