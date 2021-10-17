@@ -13,13 +13,13 @@ from controllers.deap_controller import player_controller_demo
 def evolve_agents(base_path, n=10):
 
     # Open the environment configuration
-    config_file = base_path + 'results/optimization_result.json'
+    config_file = 'assignment2/optimization_result.json'
     with open(config_file) as f:
         config = json.load(f)
 
     config['n_pop'] = 150 #50
-    config['n_gens_ga'] = 40 #80
-    config['n_gens_cma'] = 10 #20
+    config['n_gens_ga'] = 50 #80
+    config['n_gens_cma'] = 0 #20
 
     # Check folder for controllers
     controller_path = base_path + 'controllers/'
@@ -164,7 +164,8 @@ if __name__ == '__main__':
     headless = True
     if headless:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
+    path_ga = 'assignment2/experiments/ga/'
     path_deap = 'assignment2/experiments/deap/'
-    evolve_agents(path_deap)
-    run_best(path_deap)
-    performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
+    evolve_agents(path_ga)
+    # run_best(path_deap)
+    # performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
