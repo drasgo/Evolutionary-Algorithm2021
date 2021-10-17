@@ -10,16 +10,16 @@ from deap_main import main
 from environment import New_Environment as Environment
 from controllers.deap_controller import player_controller_demo
 
-def evolve_agents(base_path, n=10):
+def evolve_agents(base_path, n=4):
 
     # Open the environment configuration
     config_file = base_path + 'results/optimization_result.json'
     with open(config_file) as f:
         config = json.load(f)
 
-    config['n_pop'] = 10 #50
-    config['n_gens_ga'] = 2 #80
-    config['n_gens_cma'] = 1 #20
+    config['n_pop'] = 150 #50
+    config['n_gens_ga'] = 40 #80
+    config['n_gens_cma'] = 10 #20
 
     # Check folder for controllers
     controller_path = base_path + 'controllers/'
@@ -37,7 +37,8 @@ def evolve_agents(base_path, n=10):
         os.makedirs(result_path)
 
     # Run the algorithm for both sets of agents
-    agent_sets = [[6,8], [1,2,3,5]] 
+    agent_sets = [[5,8], [2,3,5,8]] 
+    # agent_sets = [[6,8]]
     for i, enemies in enumerate(agent_sets):
         config['enemies'] = enemies
 
@@ -164,6 +165,6 @@ if __name__ == '__main__':
     if headless:
         os.environ["SDL_VIDEODRIVER"] = "dummy"
     path_deap = 'assignment2/experiments/deap/'
-    # evolve_agents(path_deap)
-    # run_best(path_deap)
+    evolve_agents(path_deap)
+    run_best(path_deap)
     performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
