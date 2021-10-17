@@ -1,11 +1,9 @@
 import numpy as np
 import pygad.gann as gann
-import pygad.nn as nn
 import os
 import csv
 
 from pygad import GA
-from datetime import datetime
 
 from evoman.controller import Controller
 from assignment2.environment import New_Environment as Environment
@@ -15,7 +13,15 @@ from controllers.deap_controller import player_controller_demo as Demo_Controlle
 def fitness_func(solution, sol_idx):
     fitnesses = []
     gains = []
-    controller.current_solution = sol_idx
+    control = gann.population_as_matrices(controller.networks.population_networks, controller.algorithm.population)
+    values = []
+    for layer in control[sol_idx]:
+        for idx in range(len(layer[0])):
+            values.append(0)
+        for neuron in layer:
+            for weight in neuron:
+                values.append(weight)
+    controller.current_configuration = np.array(values)
 
     for enemy in controller.enemies:
         fitness, playerlife, enemylife, time = controller.environment.run_single(enemy, controller, "None")
@@ -28,8 +34,8 @@ def fitness_func(solution, sol_idx):
     if total_fitness > controller.current_best_solution[0]:
         gains_of_best = []
         for enemy in [1, 2, 3, 4, 5, 6, 7, 8]:
+            gains.clear()
             for idx in range(5):
-                gains.clear()
                 fitness, playerlife, enemylife, time = controller.environment_final.run_single(enemy, controller, "None")
                 gains.append(playerlife - enemylife)
             gains_of_best.append(sum(gains) / 5)
@@ -102,19 +108,7 @@ class ga_controller(Controller):
         controller = self
 
     def control(self, inputs: np.ndarray, controller=None):
-        # nn.predict() returns an array with an integer for each input which represents the activated output neuron
-        control = gann.population_as_matrices(self.networks.population_networks, self.algorithm.population)
-        #print(control[self.current_solution])
-        values = []
-        for layer in control[self.current_solution]:
-            for idx in range(len(layer[0])):
-                values.append(0)
-            for neuron in layer:
-                for weight in neuron:
-                    values.append(weight)
-        #print(values)
-        #print(len(values))
-        return Demo_Controller(10).control(inputs, np.array(values))
+        return Demo_Controller(10).control(inputs, self.current_configuration)
         # prediction = nn.predict(self.networks.population_networks[self.current_solution], np.array([inputs]))
         # action = [0, 0, 0, 0, 0]
         # action[round(prediction[0])] = 1
@@ -145,7 +139,7 @@ class ga_controller(Controller):
         # prepare values for box plot
         with open(f"{target_dir}/ga_solution_{enemy_string}{self.iteration}_bpv.csv", "w") as bpv_file:
             writer_b = csv.writer(bpv_file)
-            writer_b.writerows(self.current_best_solution)
+            writer_b.writerow(self.current_best_solution)
 
         #print(self.current_best_solution)
         #return 100 - (self.plotting_fitnesses[len(self.plotting_fitnesses)-1] - self.plotting_fitnesses[0])
