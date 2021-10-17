@@ -3,7 +3,6 @@ import random
 import numpy as np
 from deap import base, creator, tools, algorithms, cma
 import os, sys
-import array
 
 p = os.path.abspath('.')
 sys.path.insert(1, p)
@@ -31,63 +30,22 @@ def evaluate(individual, env):
     return (f,)
 
 # --- from DEAP documentation: https://deap.readthedocs.io/en/master/examples/es_fctmin.html
-def generateES(icls, scls, size, imin, imax, smin, smax):
+def generateES(icls, size, imin, imax):
     ind = icls(random.uniform(imin, imax) for _ in range(size))
-    ind.strategy = scls(random.uniform(smin, smax) for _ in range(size))
     return ind
-
-# --- from DEAP documentation: https://deap.readthedocs.io/en/master/examples/es_fctmin.html
-def checkStrategy(minstrategy):
-    def decorator(func):
-        def wrappper(*args, **kargs):
-            children = func(*args, **kargs)
-            for child in children:
-                for i, s in enumerate(child.strategy):
-                    if s < minstrategy:
-                        child.strategy[i] = minstrategy
-            return children
-        return wrappper
-    return decorator
-
-def apply_shared_fitness(population, ind):
-    d_threshold = 100
-    alpha = 1
-
-    temp = 0
-    for other in population:
-        dist = np.linalg.norm(ind-other)
-        print(dist)
-        if dist < d_threshold:
-            temp += 1 - (dist/d_threshold)**alpha
-    shared_fitness = ind.fitness.values / temp
-    return shared_fitness
-
-# def customTournamentSelection(population, k, tournsize=3):
-#     # Transform all fitness values to shared fitness values
-#     for ind in population:
-#         ind.fitness.values = apply_shared_fitness(population, ind)
-
-#     # # Select individuals with tournament method
-#     # chosen = []
-#     # for i in range(k):
-#     #     aspirants = [random.choice(population) for j in range(tournsize)]
-#     #     chosen.append(max([ind.fitness.values for ind in aspirants]))
-#     # return chosen
 
 def best_individual(population):
     fitnesses = [ind.fitness.values for ind in population]
     return population[np.argmax(fitnesses)]
 
 def run_deap(env, **config):
-    n_pop = config.get('n_pop', 50)
+    n_pop = config.get('n_pop', 150)
     n_gens_ga = config.get('n_gens_ga', 30)
     n_gens_cma = config.get('n_gens_cma', 15)
     mutpb = config.get('mutpb', 0.25)
     indpb = config.get('indpb', 0.25)
-    tournsize = config.get('tournsize', 3)
+    tournsize = config.get('tournsize', 2)
     cxpb = config.get('cxpb', 0.5)
-    sigma = config.get('sigma', 0.2)
-    mu = config.get('mu', 0.0)
     optimize = config.get('optimize', False)
     """
         n_pop: The population size
@@ -108,23 +66,20 @@ def run_deap(env, **config):
 
     # Creation of required types
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", np.ndarray, fitness=creator.FitnessMax, strategy=None)
-    creator.create("Strategy", array.array, typecode="d")
+    creator.create("Individual", np.ndarray, fitness=creator.FitnessMax)
 
     toolbox = base.Toolbox()
 
     # --- partially from DEAP documentation: https://deap.readthedocs.io/en/master/examples/es_fctmin.html
-    MIN_VALUE = -1
-    MAX_VALUE = 1
-    MIN_STRATEGY = 0.01
-    MAX_STRATEGY = 0.5
-    toolbox.register("individual", generateES, creator.Individual, creator.Strategy, ind_size, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
+    MIN_VALUE = -5
+    MAX_VALUE = 5
+
+    toolbox.register("attr_float", random.random)
+    toolbox.register("individual", generateES, creator.Individual, ind_size, MIN_VALUE, MAX_VALUE)
+
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    # toolbox.register('mate', tools.cxOnePoint)
-    toolbox.register("mate", tools.cxESBlend, alpha=0.1)
-    toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
-    toolbox.register("mutate", tools.mutGaussian, mu=mu, sigma=sigma, indpb=indpb)
-    toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
+    toolbox.register('mate', tools.cxOnePoint)
+    toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=0.15, indpb=indpb)
     toolbox.register("select", tools.selTournament, tournsize=tournsize)
     toolbox.register("evaluate", evaluate, env=env)
 
@@ -143,20 +98,21 @@ def run_deap(env, **config):
 
     print('GA is done, CMA-ES next!')
 
-    # implementation of CMA-ES
-    centroid = best_individual(pop_ga)
-    strategy= cma.Strategy(centroid, sigma=sigma)
-    toolbox.register("generate", strategy.generate, creator.Individual)
-    toolbox.register("update", strategy.update) 
-    pop_cma, log_cma = algorithms.eaGenerateUpdate(toolbox=toolbox, ngen=n_gens_cma, stats=stats, halloffame=hof)
-
     stats_per_gen = []
 
     for gen in log_ga:
         stats_per_gen.append([gen['Mean'], gen['Max']])
 
-    for gen in log_cma:
-        stats_per_gen.append([gen['Mean'], gen['Max']])
+    if n_gens_cma > 0:
+        # implementation of CMA-ES
+        centroid = best_individual(pop_ga)
+        strategy= cma.Strategy(centroid, sigma=0.05)
+        toolbox.register("generate", strategy.generate, creator.Individual)
+        toolbox.register("update", strategy.update) 
+        pop_cma, log_cma = algorithms.eaGenerateUpdate(toolbox=toolbox, ngen=n_gens_cma, stats=stats, halloffame=hof)
+
+        for gen in log_cma:
+            stats_per_gen.append([gen['Mean'], gen['Max']])
 
     if optimize:
         return hof[0].fitness.values[0]
@@ -165,7 +121,7 @@ def run_deap(env, **config):
 
 def main(**config):
     experiment_name = config.get('name', 'test')
-    enemies = config.get('enemies', [5,8])
+    enemies = config.get('enemies', [1,4])
     env = create_environment(experiment_name, enemies)
     return run_deap(env, **config)
 
