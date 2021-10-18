@@ -134,7 +134,7 @@ dmypy.json
 assignment1/results/ga
 assignment1/debug
 assignment1/images
-assignment2/results/ga
+# assignment2/results/ga
 assignment2/debug
 assignment2/images
 assignment2/old
