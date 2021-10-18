@@ -3,6 +3,7 @@ from deap import base
 import numpy as np
 import json
 import pickle
+import scipy
 
 from plotting import line_plot, box_plot
 from deap_main import main
@@ -18,8 +19,8 @@ def evolve_agents(base_path, n=10):
         config = json.load(f)
 
     config['n_pop'] = 50 #50
-    config['n_gens_ga'] = 40 #80
-    config['n_gens_cma'] = 10 #20
+    config['n_gens_ga'] = 50 #80
+    config['n_gens_cma'] = 0 #20
 
     # Check folder for controllers
     controller_path = base_path + 'controllers/'
@@ -27,12 +28,12 @@ def evolve_agents(base_path, n=10):
         os.makedirs(controller_path)
 
     # Check folder for images
-    image_path = 'experiments/deap/images/'
+    image_path = 'experiments/ga/images/'
     if not os.path.exists(image_path):
         os.makedirs(image_path)
 
     # Check folder for results
-    result_path = 'assignment2/experiments/deap/results/'
+    result_path = base_path + 'results/'
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
@@ -163,6 +164,10 @@ def performance_to_boxplot(file_1, file_2):
     file_1_group_1_datapoints, file_1_group_2_datapoints = collect_datapoints(data_1)
     file_2_group_1_datapoints, file_2_group_2_datapoints = collect_datapoints(data_2)
     
+    # Statistical significance
+    print('Wilcoxon test group [6,8]: ', scipy.stats.wilcoxon(file_1_group_1_datapoints, file_2_group_1_datapoints))
+    print('Wilcoxon test group [1,2,3,5]: ', scipy.stats.wilcoxon(file_1_group_2_datapoints, file_2_group_2_datapoints))
+
     # Create boxplots
     box_plot([6,8], [file_1_group_1_datapoints, file_2_group_1_datapoints], ("GA", "GA-CMS"), 'experiments')
     box_plot([1,2,3,5], [file_1_group_2_datapoints, file_2_group_2_datapoints], ("GA", "GA-CMS"), 'experiments')
@@ -173,7 +178,7 @@ if __name__ == '__main__':
         os.environ["SDL_VIDEODRIVER"] = "dummy"
     path_ga = 'assignment2/experiments/ga/'
     path_deap = 'assignment2/experiments/deap/'
-    rename_lineplot(path_deap)
+    # rename_lineplot(path_deap)
     # evolve_agents(path_ga)
-    # run_best(path_deap)
-    # performance_to_boxplot(path_deap + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
+    # run_best(path_ga)
+    performance_to_boxplot(path_ga + 'results/performance_result.pkl', path_deap + 'results/performance_result.pkl')
