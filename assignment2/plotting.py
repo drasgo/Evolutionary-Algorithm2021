@@ -1,6 +1,7 @@
 import json
 import os
 import csv
+import pickle
 from typing import List, Tuple
 
 import matplotlib
@@ -137,38 +138,65 @@ def plot_from_files(folder: str, enemies):
         lp_files = [file for file in enemy_files if "lpv" in file]
         bp_files = [file for file in enemy_files if "bpv" in file]
 
-        #test_results = box_plot_from_files(folder, bp_files, enemy)
-        #if test_results != 0:
+        # test_results = box_plot_from_files(folder, bp_files, enemy)
+        # if test_results != 0:
         #    box_results.append([enemy, test_results])
         line_plot_from_files(folder, lp_files, enemy_string)
+        make_controller_files(folder, bp_files, enemy_string)
     return box_results
 
 
-def box_plot_from_files(folder, files, enemy):
-    values = []
+def make_controller_files(folder: str, files, enemy_group):
+    target_dir = f"{folder}/ga/controller"
+    if not os.path.exists(target_dir):
+        os.mkdir(target_dir)
+
     for file in files:
         with open(f"{folder}/ga/{file}") as csvfile:
             reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
             for row in reader:
                 if row != []:
-                    fitnesses = [float(value) for value in row[2][1:-2].split(", ")]
-                    values.append(sum(fitnesses) / len(fitnesses))
+                    fitness = str(row[0]).replace(".", "x")
+                    values = np.array(row[2].replace("[", "").replace("]", "").replace("\n", "").replace("  ", " ").replace("  ", " ").replace("  ", " ").strip().split(" "))
+                    controller = []
+                    for i in range(10):
+                        controller.append(str(0.0))
+                    for i in range(200):
+                        controller.append(str(values[i]))
+                    for i in range(5):
+                        controller.append(str(0.0))
+                    for i in range(50):
+                        controller.append(str(values[i+200]))
+                    print(controller)
+        
+        with open(f"{target_dir}/ga_solution_{enemy_group}{fitness}.txt", "w+") as txt_file:
+            for value in controller:
+                txt_file.write(f"{value}\n")
+        txt_file.close()
 
-    names = [2, 5, 8]
-    frame = pd.read_csv(f"{folder}/neat/boxplot.csv", names = names)
-    if enemy in names:
-        neat_values = frame[enemy].tolist()[1:]
-        box_plot(enemy, [values, neat_values])
-        ttest = ttest_ind(values, neat_values).pvalue
-        mannwhitney = mannwhitneyu(values, neat_values).pvalue
-        #print(values, neat_values)
-        wilcoxonResult = wilcoxon(values, neat_values).pvalue
-        return [ttest, mannwhitney, wilcoxonResult]
-    else:
-        box_plot(enemy, [values, values], ["GA", "GA"])
-        return 0
 
-def line_plot_from_files(folder, files, enemy):
+# def box_plot_from_files(folder, files, enemy):
+#     values = []
+#     for file in files:
+#         with open(f"{folder}/ga/{file}") as csvfile:
+#             reader = csv.reader(csvfile, delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
+#             for row in reader:
+#                 if row != []:
+#                     fitnesses = [float(value) for value in row[2][1:-2].split(", ")]
+#                     values.append(sum(fitnesses) / len(fitnesses))
+
+#     # with open(f"{folder}/deap/performance_result.pkl", 'rb') as deap_file:
+#     #     deap_data = pickle.load(deap_file)
+#     # print(deap_data)
+#     neat_values = frame[enemy].tolist()[1:]
+#     box_plot(enemy, [values, neat_values])
+#     ttest = ttest_ind(values, neat_values).pvalue
+#     mannwhitney = mannwhitneyu(values, neat_values).pvalue
+#     #print(values, neat_values)
+#     wilcoxonResult = wilcoxon(values, neat_values).pvalue
+#     return [ttest, mannwhitney, wilcoxonResult]
+
+def line_plot_from_files(folder, files, enemy_group):
     values = []
     idx = 0
     for file in files:
@@ -179,7 +207,7 @@ def line_plot_from_files(folder, files, enemy):
                 if row != []:
                     values[idx].append(row)
         idx += 1
-    line_plot(f"{enemy}", values)
+    line_plot(f"{enemy_group}", values)
 
 
 if __name__ == '__main__':
@@ -189,6 +217,6 @@ if __name__ == '__main__':
     # best_test = [0.4,2,2.5, 3.3]
     # line_plot("", tot_test)
     # box_plot("", best_test)
-    enemies = [[1, 2, 3, 5], [6, 8]]
+    enemies = [[6, 8], [1, 2, 3, 5]]
     print(plot_from_files(f"{os.path.dirname(__file__)}/results", enemies))
 
